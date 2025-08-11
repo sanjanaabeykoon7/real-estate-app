@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  listings Listing[]
+  saved    SavedProperty[]
+}
+
+model Listing {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  price       Int
+  beds        Int
+  baths       Int
+  sqft        Int?
+  address     Json
+  images      String[]
+  published   Boolean  @default(false)
+  featured    Boolean  @default(false)
+
+  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId String
+
+  savedBy SavedProperty[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SavedProperty {
+  userId    String
+  listingId String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  @@id([userId, listingId])
+}
+
+enum Role {
+  USER
+  AGENT
+  MODERATOR
+  SUPER_ADMIN
+}
