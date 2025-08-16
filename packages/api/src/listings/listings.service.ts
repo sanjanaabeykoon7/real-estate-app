@@ -12,4 +12,10 @@ export class ListingsService {
   findOne(id: string) {
     return this.prisma.listing.findUnique({ where: { id } });
   }
+
+  async findAllAdmin() {
+    return this.prisma.listing.findMany({
+      include: { owner: { select: { id: true, name: true } } },
+    });
+  }
 }
