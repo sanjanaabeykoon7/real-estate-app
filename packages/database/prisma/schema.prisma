@@ -8,20 +8,19 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
+  id        String          @id @default(cuid())
+  email     String          @unique
   password  String
   name      String
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  listings Listing[]
-  saved    SavedProperty[]
+  role      Role            @default(USER)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  listings  Listing[]
+  saved     SavedProperty[]
 }
 
 model Listing {
-  id          String   @id @default(cuid())
+  id          String          @id @default(cuid())
   title       String
   description String
   price       Int
@@ -30,22 +29,21 @@ model Listing {
   sqft        Int?
   address     Json
   images      String[]
-  published   Boolean  @default(false)
-  featured    Boolean  @default(false)
-
-  owner   User   @relation(fields: [ownerId], references: [id])
-  ownerId String
-
-  savedBy SavedProperty[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  published   Boolean         @default(false)
+  featured    Boolean         @default(false)
+  ownerId     String
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  owner       User            @relation(fields: [ownerId], references: [id])
+  savedBy     SavedProperty[]
 }
 
 model SavedProperty {
   userId    String
   listingId String
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@id([userId, listingId])
 }
 

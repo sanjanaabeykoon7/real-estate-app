@@ -1,9 +1,9 @@
 {
-  "name": "web",
+  "name": "admin",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --port 3002",
+    "dev": "next dev --port 3003",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -11,14 +11,14 @@
   "dependencies": {
     "@prisma/client": "5.22.0",
     "@tanstack/react-query": "^5.85.2",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
+    "@tanstack/react-query-devtools": "^5.85.3",
+    "@tanstack/react-table": "^8.21.3",
     "database": "^0.0.2",
     "lucide-react": "^0.539.0",
     "next": "15.4.6",
+    "next-auth": "4.24.7",
     "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "tailwind-merge": "^3.3.1"
+    "react-dom": "19.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -28,6 +28,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
+    "prisma": "5.22.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
