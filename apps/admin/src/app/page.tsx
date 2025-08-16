@@ -1,8 +1,19 @@
-export default function AdminHome() {
+import Link from 'next/link';
+
+export default function Home() {
   return (
-    <main className="p-8">
-      <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-      <p className="mt-4">Navigate to <a href="/listings" className="text-blue-600 underline">/listings</a> to manage properties.</p>
-    </main>
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
+      <p className="mb-2">
+        <Link href="/listings" className="text-blue-600 underline">
+          Manage Listings →
+        </Link>
+      </p>
+      <p>
+        <Link href="/users" className="text-blue-600 underline">
+          Manage Users →
+        </Link>
+      </p>
+    </div>
   );
 }

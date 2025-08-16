@@ -1,10 +1,10 @@
 import NextAuth from 'next-auth';
+import { AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import type { NextAuthConfig } from 'next-auth';
 import type { JWT } from 'next-auth/jwt';
 import type { Session } from 'next-auth';
 
-export const authOptions: NextAuthConfig = {
+export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Mock',
@@ -14,16 +14,25 @@ export const authOptions: NextAuthConfig = {
       },
     }),
   ],
+  
+  pages: {
+    signIn: '/api/auth/signin',  // use built-in page
+  },
+
   callbacks: {
-    async jwt({ token, user }: { token: JWT; user?: any }) {
-      if (user) token.role = user.role;
+    async jwt({ token, user }) {
+      if ((user as any)?.role) token.role = (user as any).role;
       return token;
     },
-    async session({ session, token }: { session: Session; token: JWT }) {
-      if (session.user) {
-        session.user.role = token.role as string;
+    async session({ session, token }) {
+      if (token?.role && session.user) {
+        session.user.role = (token as any).role;
       }
       return session;
     },
-  },
+
+    async redirect({ url, baseUrl }) {
+      return baseUrl; // → http://localhost:3003/
+    },
+  },  
 };
