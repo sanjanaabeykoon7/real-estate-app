@@ -1,7 +1,11 @@
 'use client';
 import { useState } from 'react';
 
-export function ImageUpload({ onUploaded }: { onUploaded: (url: string) => void }) {
+interface Props {
+  onUploaded: (url: string) => void;
+}
+
+export function ImageUpload({ onUploaded }: Props) {
   const [uploading, setUploading] = useState(false);
 
   const handleFile = async (file: File) => {

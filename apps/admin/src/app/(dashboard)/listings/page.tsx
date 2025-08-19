@@ -1,17 +1,21 @@
 'use client';
+import { ImageUpload } from '@repo/ui/ImageUpload';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 export default function ListingsPage() {
-  const { data } = useQuery({
+  const [images, setImages] = useState<string[]>([]);
+
+  const { data, refetch } = useQuery({
     queryKey: ['admin-listings'],
     queryFn: () => fetch('http://localhost:3000/admin/listings').then(r => r.json()),
-    staleTime: 30_000,
   });
 
   return (
     <div>
       <h1 className="text-2xl font-bold mb-4">Manage Listings</h1>
-      <table className="w-full border">
+      <ImageUpload onUploaded={(url) => setImages([...images, url])} />
+      <table className="w-full border mt-4">
         <thead>
           <tr>
             <th className="border px-2 py-1">Title</th>
