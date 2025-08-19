@@ -12,6 +12,7 @@
     "@prisma/client": "5.22.0",
     "@tanstack/react-query": "^5.85.2",
     "class-variance-authority": "^0.7.1",
+    "cloudinary": "^2.7.0",
     "clsx": "^2.1.1",
     "database": "^0.0.2",
     "lucide-react": "^0.539.0",
