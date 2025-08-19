@@ -6,9 +6,10 @@ import { useQuery } from '@tanstack/react-query';
 export default function ListingsPage() {
   const [images, setImages] = useState<string[]>([]);
 
-  const { data, refetch } = useQuery({
+  const { data = [], refetch } = useQuery({
     queryKey: ['admin-listings'],
-    queryFn: () => fetch('http://localhost:3000/admin/listings').then(r => r.json()),
+    // 👇 fetch from the admin app’s API
+    queryFn: () => fetch('/api/listings').then((r) => r.json()),
   });
 
   return (
@@ -24,11 +25,11 @@ export default function ListingsPage() {
           </tr>
         </thead>
         <tbody>
-          {(data ?? []).map((l: any) => (
+          {data.map((l: any) => (
             <tr key={l.id}>
               <td className="border px-2 py-1">{l.title}</td>
               <td className="border px-2 py-1">${l.price}</td>
-              <td className="border px-2 py-1">{l.owner.name}</td>
+              <td className="border px-2 py-1">{l.owner?.name}</td>
             </tr>
           ))}
         </tbody>

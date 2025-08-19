@@ -13,7 +13,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    
+    "baseUrl": ".",
     "typeRoots": ["./node_modules/@types", "./types"],
     "plugins": [
       {
@@ -23,7 +23,8 @@
     "paths": {
       "@/*": ["./src/*"],
       "@repo/ui/*": ["../../packages/ui/src/*"],
-      "@repo/ui": ["../../packages/ui/src/index.ts"]
+      "@repo/ui": ["../../packages/ui/src/index.ts"],
+      "@repo/database/*": ["../../packages/database/src/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "../../types", "types/**/*.d.ts"],
