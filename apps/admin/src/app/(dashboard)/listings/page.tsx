@@ -37,6 +37,7 @@ export default function ListingsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-listings'] });
       setAddModal(false);
+      setImages([]); // Reset images after successful creation
       alert('Listing created successfully!');
     },
     onError: (error) => {
@@ -117,9 +118,13 @@ export default function ListingsPage() {
     return filtered;
   }, [data, searchQuery, statusFilter, sortBy, sortOrder]);
 
-  const handleImageUpload = (url: string) => {
-    setImages((prev) => [...prev, url]);
-    alert(`Uploaded: ${url}`);
+  const handleImageUpload = async (url: string) => {
+    if (url && url !== null) {
+      setImages((prev) => [...prev, url]);
+      alert(`Image uploaded successfully!`);
+    } else {
+      alert('Failed to upload image. Please try again.');
+    }
   };
 
   const handleSelectListing = (id: number) => {
@@ -486,7 +491,10 @@ export default function ListingsPage() {
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold text-gray-900">Add New Listing</h2>
               <button 
-                onClick={() => setAddModal(false)}
+                onClick={() => {
+                  setAddModal(false);
+                  setImages([]); // Reset images when closing
+                }}
                 className="text-gray-400 hover:text-gray-600"
               >
                 <X className="w-6 h-6" />
@@ -666,25 +674,42 @@ export default function ListingsPage() {
               </div>
 
               {/* Images Section */}
-              {images.length > 0 && (
-                <div className="border-t pt-4">
-                  <h3 className="text-lg font-medium text-gray-900 mb-3">Selected Images ({images.length})</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {images.map((img, idx) => (
-                      <div key={idx} className="relative">
-                        <img src={img} alt={`Upload ${idx + 1}`} className="w-full h-24 object-cover rounded border" />
-                        <button
-                          type="button"
-                          onClick={() => setImages(prev => prev.filter((_, i) => i !== idx))}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm"
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
+              <div className="border-t pt-4">
+                <h3 className="text-lg font-medium text-gray-900 mb-3">Property Images</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Upload Images</label>
+                    <div className="[&_input]:text-black [&_*]:text-black">
+                      <ImageUpload onUploaded={handleImageUpload} />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Upload multiple images to showcase your property</p>
                   </div>
+                  
+                  {images.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">Selected Images ({images.length})</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {images.map((img, idx) => (
+                          <div key={idx} className="relative">
+                            <img 
+                              src={img} 
+                              alt={`Upload ${idx + 1}`} 
+                              className="w-full h-24 object-cover rounded border" 
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setImages(prev => prev.filter((_, i) => i !== idx))}
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
 
               <div className="flex gap-3 pt-6 border-t">
                 <button
@@ -696,7 +721,10 @@ export default function ListingsPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setAddModal(false)}
+                  onClick={() => {
+                    setAddModal(false);
+                    setImages([]); // Reset images when canceling
+                  }}
                   className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
                 >
                   Cancel

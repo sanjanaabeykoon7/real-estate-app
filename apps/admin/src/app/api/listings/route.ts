@@ -30,6 +30,9 @@ export async function POST(request: NextRequest) {
       'inactive': 'INACTIVE'
     };
 
+    // Filter out null/undefined images
+    const validImages = (data.images || []).filter((img: any) => img && img !== null && typeof img === 'string');
+
     const newListing = await prisma.listing.create({
       data: {
         title: data.title,
@@ -38,13 +41,13 @@ export async function POST(request: NextRequest) {
         beds: parseInt(data.beds),
         baths: parseInt(data.baths),
         sqft: data.sqft ? parseInt(data.sqft) : null,
-        address: data.address || {}, // JSON field
+        address: data.address || {},
         location: data.location,
         status: (statusMap[data.status] || 'ACTIVE') as ListingStatus,
-        images: data.images || [], // Array of image URLs
+        images: validImages, // Use filtered images
         published: data.published === true || data.published === 'true',
         featured: data.featured === true || data.featured === 'true',
-        ownerId: data.ownerId // This should come from authentication in a real app
+        ownerId: data.ownerId
       },
       include: { owner: true }
     });
