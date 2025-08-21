@@ -1,8 +1,8 @@
 'use client';
 import { ImageUpload } from '@repo/ui/ImageUpload';
 import { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Search, Upload, Edit, Trash2, Eye, Plus, Filter, Download } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Search, Upload, Edit, Trash2, Eye, Plus, Filter, Download, X } from 'lucide-react';
 
 export default function ListingsPage() {
   const [images, setImages] = useState<string[]>([]);
@@ -13,14 +13,53 @@ export default function ListingsPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedListings, setSelectedListings] = useState<number[]>([]);
 
+  // Modal states
+  const [viewModal, setViewModal] = useState<any>(null);
+  const [editModal, setEditModal] = useState<any>(null);
+  const [deleteModal, setDeleteModal] = useState<any>(null);
+  
+  const queryClient = useQueryClient();
+
   const { data = [], refetch } = useQuery({
     queryKey: ['admin-listings'],
      // 👇 fetch from the admin app’s API
     queryFn: () => fetch('/api/listings').then((r) => r.json()),
   });
 
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => fetch(`/api/listings/${id}`, { method: 'DELETE' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-listings'] });
+      setDeleteModal(null);
+      alert('Listing deleted successfully!');
+    },
+    onError: () => {
+      alert('Failed to delete listing');
+    }
+  });
+
+  // Update mutation
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) => 
+      fetch(`/api/listings/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-listings'] });
+      setEditModal(null);
+      alert('Listing updated successfully!');
+    },
+    onError: () => {
+      alert('Failed to update listing');
+    }
+  });
+
   // Filter and sort listings
   const filteredListings = useMemo(() => {
+    console.log('data:', data, 'type:', typeof data);
     let filtered = data.filter((listing: any) => {
       const matchesSearch = 
         listing.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -75,6 +114,43 @@ export default function ListingsPage() {
       setSelectedListings([]);
     } else {
       setSelectedListings(filteredListings.map((l: any) => l.id));
+    }
+  };
+
+  const handleDelete = (listing: any) => {
+    setDeleteModal(listing);
+  };
+
+  const confirmDelete = () => {
+    if (deleteModal) {
+      deleteMutation.mutate(deleteModal.id);
+    }
+  };
+
+  const handleEdit = (listing: any) => {
+    setEditModal({ ...listing });
+  };
+
+  const handleView = (listing: any) => {
+    setViewModal(listing);
+  };
+
+  const handleUpdateSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editModal) {
+      const formData = new FormData(e.target as HTMLFormElement);
+      const updatedData = {
+        title: formData.get('title'),
+        description: formData.get('description'),
+        price: parseInt(formData.get('price') as string),
+        beds: parseInt(formData.get('beds') as string),
+        baths: parseInt(formData.get('baths') as string),
+        sqft: parseInt(formData.get('sqft') as string),
+        location: formData.get('location'),
+        status: formData.get('status'),
+        published: formData.get('published') === 'on'
+      };
+      updateMutation.mutate({ id: editModal.id, data: updatedData });
     }
   };
 
@@ -259,41 +335,65 @@ export default function ListingsPage() {
                         className="rounded border-gray-300"
                       />
                     </td>
+                    
                     <td className="px-6 py-4">
                       <div>
                         <div className="text-sm font-medium text-gray-900">{listing.title}</div>
-                        <div className="text-sm text-gray-500">{listing.location}</div>
+                        <div className="text-sm text-gray-500">
+                          {listing.address ? 
+                            (typeof listing.address === 'string' ? listing.address : 
+                             listing.address.city || listing.address.street || 'Address not available') 
+                            : 'Address not available'
+                          }
+                        </div>
                       </div>
                     </td>
+
                     <td className="px-6 py-4">
                       <div className="text-sm font-semibold text-gray-900">
-                        ${listing.price?.toLocaleString()}
+                        LKR{listing.price?.toLocaleString()}
                       </div>
                     </td>
+                    
                     <td className="px-6 py-4">
-                      {getStatusBadge(listing.status)}
+                      {getStatusBadge(listing.published ? 'active' : 'inactive')}
                     </td>
+
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-500">
-                        {listing.bedrooms} bed • {listing.bathrooms} bath • {listing.area} sqft
+                        {listing.beds} bedrooms • {listing.baths} bathrooms • {listing.sqft} sqft
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-900">{listing.owner?.name}</div>
                     </td>
+                    
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <button className="p-1 text-gray-400 hover:text-blue-600 transition-colors">
+                        <button 
+                          onClick={() => handleView(listing)}
+                          className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                          title="View Details"
+                        >
                           <Eye className="w-4 h-4" />
                         </button>
-                        <button className="p-1 text-gray-400 hover:text-green-600 transition-colors">
+                        <button 
+                          onClick={() => handleEdit(listing)}
+                          className="p-1 text-gray-400 hover:text-green-600 transition-colors"
+                          title="Edit Listing"
+                        >
                           <Edit className="w-4 h-4" />
                         </button>
-                        <button className="p-1 text-gray-400 hover:text-red-600 transition-colors">
+                        <button 
+                          onClick={() => handleDelete(listing)}
+                          className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                          title="Delete Listing"
+                        >
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
+                    
                   </tr>
                 ))}
               </tbody>
@@ -332,6 +432,223 @@ export default function ListingsPage() {
           </div>
         )}
       </div>
+      {/* View Modal */}
+      {viewModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Listing Details</h2>
+              <button 
+                onClick={() => setViewModal(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="space-y-4 text-gray-800">
+              <div>
+                <h3 className="font-semibold">Title</h3>
+                <p>{viewModal.title}</p>
+              </div>
+              <div>
+                <h3 className="font-semibold">Description</h3>
+                <p>{viewModal.description}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h3 className="font-semibold">Price</h3>
+                  <p>LKR{viewModal.price?.toLocaleString()}</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold">Status</h3>
+                  <p>{viewModal.published ? 'Active' : 'Inactive'}</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold">Bedrooms</h3>
+                  <p>{viewModal.beds}</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold">Bathrooms</h3>
+                  <p>{viewModal.baths}</p>
+                </div>
+              </div>
+              <div>
+                <h3 className="font-semibold">Square Feet</h3>
+                <p>{viewModal.sqft}</p>
+              </div>
+              <div>
+                <h3 className="font-semibold">Location</h3>
+                <p>{viewModal.location}</p>
+              </div>
+              <div>
+                <h3 className="font-semibold">Agent</h3>
+                <p>{viewModal.owner?.name}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {editModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Edit Listing</h2>
+              <button 
+                onClick={() => setEditModal(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <form onSubmit={handleUpdateSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                <input
+                  name="title"
+                  type="text"
+                  defaultValue={editModal.title}
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-black"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea
+                  name="description"
+                  defaultValue={editModal.description}
+                  rows={3}
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-black"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Price</label>
+                  <input
+                    name="price"
+                    type="number"
+                    defaultValue={editModal.price}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-black"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                  <select
+                    name="status"
+                    defaultValue={editModal.status}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-black"
+                  >
+                    <option value="active">Active</option>
+                    <option value="pending">Pending</option>
+                    <option value="sold">Sold</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Bedrooms</label>
+                  <input
+                    name="beds"
+                    type="number"
+                    defaultValue={editModal.beds}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-black"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Bathrooms</label>
+                  <input
+                    name="baths"
+                    type="number"
+                    defaultValue={editModal.baths}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-black"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Square Feet</label>
+                  <input
+                    name="sqft"
+                    type="number"
+                    defaultValue={editModal.sqft}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-black"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                <input
+                  name="location"
+                  type="text"
+                  defaultValue={editModal.location}
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-black"
+                />
+              </div>
+              <div className="flex items-center">
+                <input
+                  name="published"
+                  type="checkbox"
+                  defaultChecked={editModal.published}
+                  className="mr-2"
+                />
+                <label className="text-sm font-medium text-gray-700">Published</label>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="submit"
+                  disabled={updateMutation.isPending}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
+                >
+                  {updateMutation.isPending ? 'Updating...' : 'Update Listing'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditModal(null)}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Confirm Delete</h2>
+              <button 
+                onClick={() => setDeleteModal(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete "{deleteModal.title}"? This action cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={confirmDelete}
+                disabled={deleteMutation.isPending}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400"
+              >
+                {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+              </button>
+              <button
+                onClick={() => setDeleteModal(null)}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
