@@ -17,13 +17,32 @@ export default function ListingsPage() {
   const [viewModal, setViewModal] = useState<any>(null);
   const [editModal, setEditModal] = useState<any>(null);
   const [deleteModal, setDeleteModal] = useState<any>(null);
+  const [addModal, setAddModal] = useState(false);
   
   const queryClient = useQueryClient();
 
   const { data = [], refetch } = useQuery({
     queryKey: ['admin-listings'],
-     // 👇 fetch from the admin app’s API
     queryFn: () => fetch('/api/listings').then((r) => r.json()),
+  });
+
+  // Create mutation
+  const createMutation = useMutation({
+    mutationFn: (data: any) => 
+      fetch('/api/listings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      }).then(res => res.json()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-listings'] });
+      setAddModal(false);
+      alert('Listing created successfully!');
+    },
+    onError: (error) => {
+      console.error('Create error:', error);
+      alert('Failed to create listing');
+    }
   });
 
   // Delete mutation
@@ -59,7 +78,10 @@ export default function ListingsPage() {
 
   // Filter and sort listings
   const filteredListings = useMemo(() => {
-    console.log('data:', data, 'type:', typeof data);
+    if (!Array.isArray(data)) {
+      return [];
+    }
+    
     let filtered = data.filter((listing: any) => {
       const matchesSearch = 
         listing.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -71,7 +93,6 @@ export default function ListingsPage() {
       return matchesSearch && matchesStatus;
     });
 
-    // Sort listings
     filtered.sort((a: any, b: any) => {
       let aVal = a[sortBy];
       let bVal = b[sortBy];
@@ -135,6 +156,38 @@ export default function ListingsPage() {
     setViewModal(listing);
   };
 
+  const handleCreateSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const formData = new FormData(e.target as HTMLFormElement);
+    
+    // Parse address into JSON format
+    const addressData = {
+      street: formData.get('street'),
+      city: formData.get('city'),
+      state: formData.get('state'),
+      zipCode: formData.get('zipCode'),
+      country: formData.get('country') || 'Sri Lanka'
+    };
+    
+    const newData = {
+      title: formData.get('title'),
+      description: formData.get('description'),
+      price: formData.get('price'),
+      beds: formData.get('beds'),
+      baths: formData.get('baths'),
+      sqft: formData.get('sqft'),
+      address: addressData,
+      location: formData.get('location'),
+      status: formData.get('status') || 'active',
+      published: formData.get('published') === 'on',
+      featured: formData.get('featured') === 'on',
+      images: images,
+      ownerId: 'cme7fsaua00003dehf0kwadnd' // TODO: Get from authenticated user
+    };
+    
+    createMutation.mutate(newData);
+  };
+
   const handleUpdateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editModal) {
@@ -156,15 +209,15 @@ export default function ListingsPage() {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      active: 'bg-green-100 text-green-800 border-green-200',
-      pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      sold: 'bg-blue-100 text-blue-800 border-blue-200',
-      inactive: 'bg-gray-100 text-gray-800 border-gray-200'
+      ACTIVE: 'bg-green-100 text-green-800 border-green-200',
+      PENDING: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      SOLD: 'bg-blue-100 text-blue-800 border-blue-200',
+      INACTIVE: 'bg-gray-100 text-gray-800 border-gray-200'
     };
     
     return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium border ${statusConfig[status as keyof typeof statusConfig] || statusConfig.inactive}`}>
-        {status?.charAt(0).toUpperCase() + status?.slice(1)}
+      <span className={`px-2 py-1 rounded-full text-xs font-medium border ${statusConfig[status as keyof typeof statusConfig] || statusConfig.INACTIVE}`}>
+        {status?.charAt(0).toUpperCase() + status?.slice(1).toLowerCase()}
       </span>
     );
   };
@@ -177,7 +230,10 @@ export default function ListingsPage() {
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-3xl font-bold text-gray-900">Manage Listings</h1>
             <div className="flex gap-3">
-              <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              <button 
+                onClick={() => setAddModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
                 <Plus className="w-4 h-4" />
                 Add Listing
               </button>
@@ -230,10 +286,10 @@ export default function ListingsPage() {
                     className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-black"
                   >
                     <option value="all">All Status</option>
-                    <option value="active">Active</option>
-                    <option value="pending">Pending</option>
-                    <option value="sold">Sold</option>
-                    <option value="inactive">Inactive</option>
+                    <option value="ACTIVE">Active</option>
+                    <option value="PENDING">Pending</option>
+                    <option value="SOLD">Sold</option>
+                    <option value="INACTIVE">Inactive</option>
                   </select>
                 </div>
                 
@@ -266,23 +322,14 @@ export default function ListingsPage() {
             </div>
           )}
 
-          {/* Image Upload */}
-          <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <div className="flex items-center gap-3 mb-3">
-              <Upload className="w-5 h-5 text-blue-600" />
-              <span className="text-sm font-medium text-blue-600">Upload Images</span>
-            </div>
-            <div className="[&_input]:text-black [&_*]:text-black">
-              <ImageUpload onUploaded={handleImageUpload} />
-            </div>
-          </div>
+          
         </div>
 
         {/* Results Summary */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
           <div className="flex justify-between items-center">
             <div className="text-sm text-gray-600">
-              Showing {filteredListings.length} of {data.length} listings
+              Showing {filteredListings.length} of {Array.isArray(data) ? data.length : 0} listings
               {searchQuery && (
                 <span className="ml-2 text-blue-600">
                   for "{searchQuery}"
@@ -340,10 +387,9 @@ export default function ListingsPage() {
                       <div>
                         <div className="text-sm font-medium text-gray-900">{listing.title}</div>
                         <div className="text-sm text-gray-500">
-                          {listing.address ? 
-                            (typeof listing.address === 'string' ? listing.address : 
-                             listing.address.city || listing.address.street || 'Address not available') 
-                            : 'Address not available'
+                          {listing.address && typeof listing.address === 'object' ? 
+                            `${listing.address.street || ''} ${listing.address.city || ''}`.trim() || 'Address not available'
+                            : listing.location || 'Address not available'
                           }
                         </div>
                       </div>
@@ -356,14 +402,15 @@ export default function ListingsPage() {
                     </td>
                     
                     <td className="px-6 py-4">
-                      {getStatusBadge(listing.published ? 'active' : 'inactive')}
+                      {getStatusBadge(listing.status)}
                     </td>
 
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-500">
-                        {listing.beds} bedrooms • {listing.baths} bathrooms • {listing.sqft} sqft
+                        {listing.beds} beds • {listing.baths} baths • {listing.sqft} sqft
                       </div>
                     </td>
+                    
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-900">{listing.owner?.name}</div>
                     </td>
@@ -393,7 +440,6 @@ export default function ListingsPage() {
                         </button>
                       </div>
                     </td>
-                    
                   </tr>
                 ))}
               </tbody>
@@ -432,6 +478,235 @@ export default function ListingsPage() {
           </div>
         )}
       </div>
+
+      {/* Add Listing Modal */}
+      {addModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Add New Listing</h2>
+              <button 
+                onClick={() => setAddModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <form onSubmit={handleCreateSubmit} className="space-y-4">
+              {/* Basic Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Property Title*</label>
+                  <input
+                    name="title"
+                    type="text"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-black"
+                    required
+                    placeholder="e.g. Beautiful 3BR House in Colombo"
+                  />
+                </div>
+                
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <textarea
+                    name="description"
+                    rows={4}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-black"
+                    placeholder="Describe the property features, amenities, etc."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Price (LKR)*</label>
+                  <input
+                    name="price"
+                    type="number"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-black"
+                    required
+                    placeholder="3000000"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                  <select
+                    name="status"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-black"
+                  >
+                    <option value="active">Active</option>
+                    <option value="pending">Pending</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Bedrooms*</label>
+                  <input
+                    name="beds"
+                    type="number"
+                    min="0"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-black"
+                    required
+                    placeholder="3"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Bathrooms*</label>
+                  <input
+                    name="baths"
+                    type="number"
+                    min="0"
+                    step="0.5"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-black"
+                    required
+                    placeholder="2"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Square Feet</label>
+                  <input
+                    name="sqft"
+                    type="number"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-black"
+                    placeholder="1800"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Location/Area</label>
+                  <input
+                    name="location"
+                    type="text"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-black"
+                    placeholder="e.g. Colombo 03"
+                  />
+                </div>
+              </div>
+
+              {/* Address Fields */}
+              <div className="border-t pt-4">
+                <h3 className="text-lg font-medium text-gray-900 mb-3">Address Details</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Street Address</label>
+                    <input
+                      name="street"
+                      type="text"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-black"
+                      placeholder="123 Main Street"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                    <input
+                      name="city"
+                      type="text"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-black"
+                      placeholder="Colombo"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">State/Province</label>
+                    <input
+                      name="state"
+                      type="text"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-black"
+                      placeholder="Western Province"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Zip/Postal Code</label>
+                    <input
+                      name="zipCode"
+                      type="text"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-black"
+                      placeholder="00100"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                    <input
+                      name="country"
+                      type="text"
+                      defaultValue="Sri Lanka"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-black"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Options */}
+              <div className="border-t pt-4">
+                <h3 className="text-lg font-medium text-gray-900 mb-3">Publishing Options</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center">
+                    <input
+                      name="published"
+                      type="checkbox"
+                      className="mr-3 rounded border-gray-300"
+                      defaultChecked
+                    />
+                    <label className="text-sm font-medium text-gray-700">Publish immediately</label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      name="featured"
+                      type="checkbox"
+                      className="mr-3 rounded border-gray-300"
+                    />
+                    <label className="text-sm font-medium text-gray-700">Mark as featured</label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Images Section */}
+              {images.length > 0 && (
+                <div className="border-t pt-4">
+                  <h3 className="text-lg font-medium text-gray-900 mb-3">Selected Images ({images.length})</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {images.map((img, idx) => (
+                      <div key={idx} className="relative">
+                        <img src={img} alt={`Upload ${idx + 1}`} className="w-full h-24 object-cover rounded border" />
+                        <button
+                          type="button"
+                          onClick={() => setImages(prev => prev.filter((_, i) => i !== idx))}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-6 border-t">
+                <button
+                  type="submit"
+                  disabled={createMutation.isPending}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 font-medium"
+                >
+                  {createMutation.isPending ? 'Creating...' : 'Create Listing'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAddModal(false)}
+                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* View Modal */}
       {viewModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -461,7 +736,7 @@ export default function ListingsPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold">Status</h3>
-                  <p>{viewModal.published ? 'Active' : 'Inactive'}</p>
+                  <p>{viewModal.status}</p>
                 </div>
                 <div>
                   <h3 className="font-semibold">Bedrooms</h3>
@@ -481,9 +756,25 @@ export default function ListingsPage() {
                 <p>{viewModal.location}</p>
               </div>
               <div>
+                <h3 className="font-semibold">Address</h3>
+                <p>{viewModal.address && typeof viewModal.address === 'object' ? 
+                  `${viewModal.address.street || ''} ${viewModal.address.city || ''} ${viewModal.address.state || ''}`.trim() || 'Not specified'
+                  : 'Not specified'}</p>
+              </div>
+              <div>
                 <h3 className="font-semibold">Agent</h3>
                 <p>{viewModal.owner?.name}</p>
               </div>
+              {viewModal.images && viewModal.images.length > 0 && (
+                <div>
+                  <h3 className="font-semibold mb-2">Images</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    {viewModal.images.map((img: string, idx: number) => (
+                      <img key={idx} src={img} alt={`Property ${idx + 1}`} className="w-full h-32 object-cover rounded border" />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
