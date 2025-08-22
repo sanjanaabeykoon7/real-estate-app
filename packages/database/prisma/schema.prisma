@@ -28,6 +28,8 @@ model Listing {
   baths       Int
   sqft        Int?
   address     Json
+  location    String?         
+  status      ListingStatus   @default(ACTIVE)
   images      String[]
   published   Boolean         @default(false)
   featured    Boolean         @default(false)
@@ -36,6 +38,13 @@ model Listing {
   updatedAt   DateTime        @updatedAt
   owner       User            @relation(fields: [ownerId], references: [id])
   savedBy     SavedProperty[]
+}
+
+enum ListingStatus {
+  ACTIVE
+  PENDING
+  SOLD
+  INACTIVE
 }
 
 model SavedProperty {

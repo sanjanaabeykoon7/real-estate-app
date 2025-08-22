@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Prisma } from '@prisma/client';
+import SearchBar from '@/components/SearchBar';
 
 type ListingWithOwner = Prisma.ListingGetPayload<{
   include: { owner: { select: { name: true } } };
@@ -43,3 +44,5 @@ export default async function Home() {
     </main>
   );
 }
+
+<SearchBar />
