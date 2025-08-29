@@ -1,6 +1,6 @@
 'use client';
 import { ImageUpload } from '@repo/ui/ImageUpload';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, Edit, Trash2, Eye, Plus, Filter, Download, X } from 'lucide-react';
 
@@ -12,6 +12,8 @@ export default function ListingsPage() {
   const [sortOrder, setSortOrder] = useState('asc');
   const [showFilters, setShowFilters] = useState(false);
   const [selectedListings, setSelectedListings] = useState<number[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
 
   // Modal states
   const [viewModal, setViewModal] = useState<any>(null);
@@ -77,10 +79,10 @@ export default function ListingsPage() {
     }
   });
 
-  // Filter and sort listings
-  const filteredListings = useMemo(() => {
+  // Filter, sort, and paginate listings
+  const { paginatedListings, totalPages, startIndex, endIndex, totalFiltered } = useMemo(() => {
     if (!Array.isArray(data)) {
-      return [];
+      return { paginatedListings: [], totalPages: 0, startIndex: 0, endIndex: 0, totalFiltered: 0 };
     }
     
     let filtered = data.filter((listing: any) => {
@@ -115,8 +117,31 @@ export default function ListingsPage() {
       }
     });
 
-    return filtered;
-  }, [data, searchQuery, statusFilter, sortBy, sortOrder]);
+    const totalFiltered = filtered.length;
+    const totalPages = Math.ceil(totalFiltered / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, totalFiltered);
+    const paginatedListings = filtered.slice(startIndex, endIndex);
+
+    return { paginatedListings, totalPages, startIndex, endIndex, totalFiltered };
+  }, [data, searchQuery, statusFilter, sortBy, sortOrder, currentPage, itemsPerPage]);
+
+  // Add pagination handlers
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handlePrevious = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  const handleNext = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
+
+  useEffect(() => {
+    setCurrentPage(1); // Reset to first page when search/filter changes
+  }, [searchQuery, statusFilter]);
 
   const handleImageUpload = async (url: string) => {
     if (url && url !== null) {
@@ -136,10 +161,10 @@ export default function ListingsPage() {
   };
 
   const handleSelectAll = () => {
-    if (selectedListings.length === filteredListings.length) {
+    if (selectedListings.length === paginatedListings.length) {
       setSelectedListings([]);
     } else {
-      setSelectedListings(filteredListings.map((l: any) => l.id));
+      setSelectedListings(paginatedListings.map((l: any) => l.id));
     }
   };
 
@@ -331,7 +356,7 @@ export default function ListingsPage() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
           <div className="flex justify-between items-center">
             <div className="text-sm text-gray-600">
-              Showing {filteredListings.length} of {Array.isArray(data) ? data.length : 0} listings
+              Showing {startIndex + 1} to {endIndex} of {totalFiltered} results
               {searchQuery && (
                 <span className="ml-2 text-blue-600">
                   for "{searchQuery}"
@@ -360,7 +385,7 @@ export default function ListingsPage() {
                   <th className="px-6 py-3 text-left">
                     <input
                       type="checkbox"
-                      checked={selectedListings.length === filteredListings.length && filteredListings.length > 0}
+                      checked={selectedListings.length === paginatedListings.length && paginatedListings.length > 0}
                       onChange={handleSelectAll}
                       className="rounded border-gray-300"
                     />
@@ -374,7 +399,7 @@ export default function ListingsPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredListings.map((listing: any) => (
+                {paginatedListings.map((listing: any) => (
                   <tr key={listing.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4">
                       <input
@@ -448,7 +473,7 @@ export default function ListingsPage() {
             </table>
           </div>
 
-          {filteredListings.length === 0 && (
+          {paginatedListings.length === 0 && (
             <div className="text-center py-12">
               <div className="text-gray-500 text-lg mb-2">No listings found</div>
               <div className="text-gray-400 text-sm">
@@ -459,20 +484,50 @@ export default function ListingsPage() {
         </div>
 
         {/* Pagination */}
-        {filteredListings.length > 0 && (
+        {totalPages > 1 && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 px-6 py-4 mt-6">
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-600">
-                Showing 1 to {filteredListings.length} of {filteredListings.length} results
+                Showing {startIndex + 1} to {endIndex} of {paginatedListings.length > 0 ? Array.isArray(data) ? data.filter((listing: any) => {
+                  const matchesSearch = 
+                    listing.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    listing.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    listing.owner?.name?.toLowerCase().includes(searchQuery.toLowerCase());
+                  const matchesStatus = statusFilter === 'all' || listing.status === statusFilter;
+                  return matchesSearch && matchesStatus;
+                }).length : 0 : 0} results
               </div>
               <div className="flex items-center gap-2">
-                <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-colors text-black">
+                <button 
+                  onClick={handlePrevious}
+                  disabled={currentPage <= 1}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors text-black disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   Previous
                 </button>
-                <button className="px-3 py-1 bg-blue-600 text-white rounded text-sm">
-                  1
-                </button>
-                <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-colors text-black">
+                
+                {/* Page numbers */}
+                <div className="flex gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => handlePageChange(page)}
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        page === currentPage
+                          ? 'bg-blue-600 text-white'
+                          : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+                
+                <button 
+                  onClick={handleNext}
+                  disabled={currentPage >= totalPages}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors text-black disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   Next
                 </button>
               </div>
