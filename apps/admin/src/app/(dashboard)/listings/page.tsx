@@ -3,6 +3,7 @@ import { ImageUpload } from '@repo/ui/ImageUpload';
 import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, Edit, Trash2, Eye, Plus, Filter, Download, X } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 
 export default function ListingsPage() {
   const [images, setImages] = useState<string[]>([]);
@@ -14,6 +15,7 @@ export default function ListingsPage() {
   const [selectedListings, setSelectedListings] = useState<number[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
+  const { data: session } = useSession();
 
   // Modal states
   const [viewModal, setViewModal] = useState<any>(null);
@@ -212,7 +214,7 @@ export default function ListingsPage() {
       published: formData.get('published') === 'on',
       featured: formData.get('featured') === 'on',
       images: images,
-      ownerId: 'cme7fsaua00003dehf0kwadnd' // TODO: Get from authenticated user
+      ownerId: (session?.user as any)?.id // Get the logged-in user's ID
     };
     
     createMutation.mutate(newData);
