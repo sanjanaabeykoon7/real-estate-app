@@ -20,6 +20,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "bcryptjs": "^3.0.2"
+    "bcryptjs": "^3.0.2",
+    "next": "15.4.6"
   }
 }
