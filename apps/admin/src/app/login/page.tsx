@@ -99,10 +99,7 @@ export default function LoginPage() {
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23e2e8f0\' fill-opacity=\'0.3\'%3E%3Ccircle cx=\'30\' cy=\'30\' r=\'1\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-40"></div>
         
-        {/* Floating architectural elements */}
-        <div className="absolute top-10 left-10 w-32 h-32 bg-blue-100 opacity-30 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-10 right-10 w-40 h-40 bg-slate-200 opacity-40 rounded-full blur-3xl animate-pulse animation-delay-2s"></div>
-        <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-blue-200 opacity-20 rounded-full blur-2xl animate-pulse animation-delay-4s"></div>
+        
       </div>
 
       {/* Main content container */}

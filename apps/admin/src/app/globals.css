@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-@theme {
+:root {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 }
@@ -14,94 +14,6 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-}
-
-/* Animation keyframes */
-@keyframes blob {
-  0% {
-    transform: translate(0px, 0px) scale(1);
-  }
-  33% {
-    transform: translate(30px, -50px) scale(1.1);
-  }
-  66% {
-    transform: translate(-20px, 20px) scale(0.9);
-  }
-  100% {
-    transform: translate(0px, 0px) scale(1);
-  }
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px) scale(1);
-    opacity: 0.3;
-  }
-  50% {
-    transform: translateY(-20px) scale(1.05);
-    opacity: 0.6;
-  }
-}
-
-@keyframes bounce-slow {
-  0%, 100% {
-    transform: translateY(0) scale(1);
-    opacity: 0.2;
-  }
-  50% {
-    transform: translateY(-10px) scale(1.1);
-    opacity: 0.4;
-  }
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-.animate-blob {
-  animation: blob 7s infinite;
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-.animate-bounce-slow {
-  animation: bounce-slow 4s ease-in-out infinite;
-}
-
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-.animate-shimmer {
-  animation: shimmer 3s linear infinite;
-}
-
-.animation-delay-2s {
-  animation-delay: 2s;
-}
-
-.animation-delay-3s {
-  animation-delay: 3s;
-}
-
-.animation-delay-4s {
-  animation-delay: 4s;
 }
 
 /* Blur utilities */
