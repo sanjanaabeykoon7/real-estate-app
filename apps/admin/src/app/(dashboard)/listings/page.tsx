@@ -1,8 +1,9 @@
 'use client';
 import { ImageUpload } from '@repo/ui/ImageUpload';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, Upload, Edit, Trash2, Eye, Plus, Filter, Download, X } from 'lucide-react';
+import { Search, Edit, Trash2, Eye, Plus, Filter, Download, X } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 
 export default function ListingsPage() {
   const [images, setImages] = useState<string[]>([]);
@@ -12,6 +13,9 @@ export default function ListingsPage() {
   const [sortOrder, setSortOrder] = useState('asc');
   const [showFilters, setShowFilters] = useState(false);
   const [selectedListings, setSelectedListings] = useState<number[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
+  const { data: session } = useSession();
 
   // Modal states
   const [viewModal, setViewModal] = useState<any>(null);
@@ -77,10 +81,10 @@ export default function ListingsPage() {
     }
   });
 
-  // Filter and sort listings
-  const filteredListings = useMemo(() => {
+  // Filter, sort, and paginate listings
+  const { paginatedListings, totalPages, startIndex, endIndex, totalFiltered } = useMemo(() => {
     if (!Array.isArray(data)) {
-      return [];
+      return { paginatedListings: [], totalPages: 0, startIndex: 0, endIndex: 0, totalFiltered: 0 };
     }
     
     let filtered = data.filter((listing: any) => {
@@ -115,8 +119,31 @@ export default function ListingsPage() {
       }
     });
 
-    return filtered;
-  }, [data, searchQuery, statusFilter, sortBy, sortOrder]);
+    const totalFiltered = filtered.length;
+    const totalPages = Math.ceil(totalFiltered / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, totalFiltered);
+    const paginatedListings = filtered.slice(startIndex, endIndex);
+
+    return { paginatedListings, totalPages, startIndex, endIndex, totalFiltered };
+  }, [data, searchQuery, statusFilter, sortBy, sortOrder, currentPage, itemsPerPage]);
+
+  // Add pagination handlers
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handlePrevious = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  const handleNext = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
+
+  useEffect(() => {
+    setCurrentPage(1); // Reset to first page when search/filter changes
+  }, [searchQuery, statusFilter]);
 
   const handleImageUpload = async (url: string) => {
     if (url && url !== null) {
@@ -136,10 +163,10 @@ export default function ListingsPage() {
   };
 
   const handleSelectAll = () => {
-    if (selectedListings.length === filteredListings.length) {
+    if (selectedListings.length === paginatedListings.length) {
       setSelectedListings([]);
     } else {
-      setSelectedListings(filteredListings.map((l: any) => l.id));
+      setSelectedListings(paginatedListings.map((l: any) => l.id));
     }
   };
 
@@ -187,7 +214,7 @@ export default function ListingsPage() {
       published: formData.get('published') === 'on',
       featured: formData.get('featured') === 'on',
       images: images,
-      ownerId: 'cme7fsaua00003dehf0kwadnd' // TODO: Get from authenticated user
+      ownerId: (session?.user as any)?.id // Get the logged-in user's ID
     };
     
     createMutation.mutate(newData);
@@ -229,23 +256,20 @@ export default function ListingsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-none">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <h1 className="text-3xl font-bold text-gray-900">Manage Listings</h1>
-            <div className="flex gap-3">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-6">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-4xl font-bold text-gray-900">Manage Listings</h1>
+            <div className="flex gap-4">
               <button 
                 onClick={() => setAddModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-5 h-5" />
                 Add Listing
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
-                <Download className="w-4 h-4" />
-                Export
-              </button>
+              
             </div>
           </div>
 
@@ -334,7 +358,7 @@ export default function ListingsPage() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
           <div className="flex justify-between items-center">
             <div className="text-sm text-gray-600">
-              Showing {filteredListings.length} of {Array.isArray(data) ? data.length : 0} listings
+              Showing {startIndex + 1} to {endIndex} of {totalFiltered} results
               {searchQuery && (
                 <span className="ml-2 text-blue-600">
                   for "{searchQuery}"
@@ -363,7 +387,7 @@ export default function ListingsPage() {
                   <th className="px-6 py-3 text-left">
                     <input
                       type="checkbox"
-                      checked={selectedListings.length === filteredListings.length && filteredListings.length > 0}
+                      checked={selectedListings.length === paginatedListings.length && paginatedListings.length > 0}
                       onChange={handleSelectAll}
                       className="rounded border-gray-300"
                     />
@@ -377,7 +401,7 @@ export default function ListingsPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredListings.map((listing: any) => (
+                {paginatedListings.map((listing: any) => (
                   <tr key={listing.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4">
                       <input
@@ -451,7 +475,7 @@ export default function ListingsPage() {
             </table>
           </div>
 
-          {filteredListings.length === 0 && (
+          {paginatedListings.length === 0 && (
             <div className="text-center py-12">
               <div className="text-gray-500 text-lg mb-2">No listings found</div>
               <div className="text-gray-400 text-sm">
@@ -462,20 +486,50 @@ export default function ListingsPage() {
         </div>
 
         {/* Pagination */}
-        {filteredListings.length > 0 && (
+        {totalPages > 1 && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 px-6 py-4 mt-6">
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-600">
-                Showing 1 to {filteredListings.length} of {filteredListings.length} results
+                Showing {startIndex + 1} to {endIndex} of {paginatedListings.length > 0 ? Array.isArray(data) ? data.filter((listing: any) => {
+                  const matchesSearch = 
+                    listing.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    listing.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    listing.owner?.name?.toLowerCase().includes(searchQuery.toLowerCase());
+                  const matchesStatus = statusFilter === 'all' || listing.status === statusFilter;
+                  return matchesSearch && matchesStatus;
+                }).length : 0 : 0} results
               </div>
               <div className="flex items-center gap-2">
-                <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-colors text-black">
+                <button 
+                  onClick={handlePrevious}
+                  disabled={currentPage <= 1}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors text-black disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   Previous
                 </button>
-                <button className="px-3 py-1 bg-blue-600 text-white rounded text-sm">
-                  1
-                </button>
-                <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-colors text-black">
+                
+                {/* Page numbers */}
+                <div className="flex gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => handlePageChange(page)}
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        page === currentPage
+                          ? 'bg-blue-600 text-white'
+                          : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+                
+                <button 
+                  onClick={handleNext}
+                  disabled={currentPage >= totalPages}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors text-black disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   Next
                 </button>
               </div>

@@ -1,4 +1,5 @@
 {
+  "extends": "@repo/typescript-config/nextjs.json",
   "compilerOptions": {
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
@@ -15,6 +16,11 @@
     "incremental": true,
     "baseUrl": ".",
     "typeRoots": ["./node_modules/@types", "./types"],
+    "allowImportingTsExtensions": false,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    
+
     "plugins": [
       {
         "name": "next"
@@ -25,8 +31,17 @@
       "@repo/ui/*": ["../../packages/ui/src/*"],
       "@repo/ui": ["../../packages/ui/src/index.ts"],
       "@repo/database/*": ["../../packages/database/src/*"]
-    }
+    },
+    "types": ["node"],
+    "noImplicitAny": false
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "../../types", "types/**/*.d.ts"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "src/types/next-auth.d.ts",
+    "src/types/global.d.ts"
+, "next.config.js"  ],
   "exclude": ["node_modules"]
 }
