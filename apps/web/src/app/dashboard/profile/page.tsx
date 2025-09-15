@@ -142,7 +142,7 @@ export default function ProfilePage() {
         {!isEditing && (
           <button
             onClick={() => setIsEditing(true)}
-            className="inline-flex items-center px-4 py-2 bg-[#002b4c] text-white rounded-lg hover:bg-[#003d6b] transition-colors"
+            className="inline-flex items-center px-4 py-2 bg-[#002b4c] text-white rounded-lg hover:bg-[#003d6b] transition-colors cursor-pointer"
           >
             <Edit3 size={18} className="mr-2" />
             Edit Profile
@@ -297,7 +297,7 @@ export default function ProfilePage() {
             <div className="flex justify-end space-x-3 mt-6 pt-6 border-t border-gray-200">
               <button
                 onClick={handleCancel}
-                className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
                 disabled={saving}
               >
                 Cancel
@@ -305,7 +305,7 @@ export default function ProfilePage() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="inline-flex items-center px-4 py-2 bg-[#002b4c] text-white rounded-lg hover:bg-[#003d6b] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center px-4 py-2 bg-[#002b4c] text-white rounded-lg hover:bg-[#003d6b] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 <Save size={18} className="mr-2" />
                 {saving ? 'Saving...' : 'Save Changes'}

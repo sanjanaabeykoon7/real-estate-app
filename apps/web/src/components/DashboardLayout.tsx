@@ -97,7 +97,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             
             <div className="hidden md:flex items-center space-x-8">
               <Link href="/" className="text-white hover:text-[#0dcaf0] font-medium transition-colors">
-                Back to Site
+                Home
+              </Link>
+              <Link href="#listings" className="text-white hover:text-[#0dcaf0] font-medium transition-colors">
+                All Properties
+              </Link>
+              <Link href="/about" className="text-white hover:text-[#0dcaf0] font-medium transition-colors">
+                About Us
+              </Link>
+              <Link href="/contact" className="text-white hover:text-[#0dcaf0] font-medium transition-colors">
+                Contact Us
+              </Link>
+              <Link href="/dashboard/profile" className="text-white hover:text-[#0dcaf0] font-medium transition-colors">
+                My Profile
               </Link>
             </div>
 
@@ -163,7 +175,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="p-4 border-t border-gray-200">
               <button
                 onClick={handleLogout}
-                className="flex items-center space-x-3 w-full px-3 py-2.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                className="flex items-center space-x-3 w-full px-3 py-2.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
               >
                 <LogOut size={20} />
                 <span className="font-medium">Logout</span>

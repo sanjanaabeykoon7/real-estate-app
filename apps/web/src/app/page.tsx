@@ -368,7 +368,7 @@ function PropertyCard({ listing, featured = false }: { listing: ListingWithOwner
         {/* Status Badge */}
         <div className="absolute top-2 left-2">
           <span className={twMerge(
-            "px-3 py-1 text-xs font-bold rounded-full shadow-lg",
+            "px-1.5 py-0.5 text-xs font-semibold rounded-full shadow-lg",
             listing.status === 'ACTIVE' && "bg-green-500 text-white",
             listing.status === 'PENDING' && "bg-yellow-500 text-white",
             listing.status === 'SOLD' && "bg-red-500 text-white",
@@ -380,9 +380,9 @@ function PropertyCard({ listing, featured = false }: { listing: ListingWithOwner
 
         {/* Favorite/Save Button */}
         <div className="absolute top-2 right-2">
-          <button className="w-7 h-7 bg-white/80 backdrop-blur-0.5px rounded-full flex items-center justify-center text-gray-600 transition-all shadow-lg">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          <button className="transition-all hover:scale-110 focus:outline-none cursor-pointer" title="Add to favorites">
+            <svg className="w-7 h-7 transition-all text-white/90 hover:text-red-500 drop-shadow-lg" fill="currentColor" stroke="none" viewBox="0 0 24 24">
+              <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
           </button>
         </div>

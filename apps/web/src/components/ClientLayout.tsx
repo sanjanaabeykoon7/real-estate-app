@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import AuthModal from "./AuthModal";
+import { User } from "lucide-react";
 
 interface ClientLayoutProps {
   children: React.ReactNode;
@@ -41,26 +42,20 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
 
             <div className="flex items-center space-x-4">
               {/* User Profile Icon and Add Listing Button */}
-              <button 
+              <button
                 onClick={() => {
                   setAuthMode('login');
                   setIsAuthModalOpen(true);
                 }}
-                className="hidden md:inline-flex items-center px-1.5 py-1.5 rounded-2xl text-[#002b4c] bg-white hover:bg-[#0dcaf0] font-medium transition-colors cursor-pointer" 
+                className="w-8 h-8 bg-white rounded-full flex items-center justify-center bg-[#ffffff] hover:bg-[#e0f7fb] transition-colors cursor-pointer"
                 aria-label="User Profile"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M20.822 18.096c-3.439-.794-6.64-1.49-5.09-4.418 4.72-8.912 1.251-13.678-3.732-13.678-5.082 0-8.464 4.949-3.732 13.678 1.597 2.945-1.725 3.641-5.09 4.418-3.073.71-3.188 2.236-3.178 4.904l.004 1h23.99l.004-.969c.012-2.688-.092-4.222-3.176-4.935z"/>
-                </svg>
+                <User size={16} className="text-[#002b4c]" />
               </button>
-              <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-2xl font-medium transition-colors cursor-pointer">
+
+              <Link href="/dashboard/add-property" className="bg-[#003d6b] hover:bg-[#172836] text-white px-3 py-1 rounded-2xl font-medium transition-colors">
                 Add Listing
-              </button>
+              </Link>
             </div>
           </div>
         </nav>

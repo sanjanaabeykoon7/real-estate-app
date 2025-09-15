@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -16,13 +16,16 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Await params first
+    const { id } = await params;
+
     // Users can only access their own profile
-    if (session.user.id !== params.id) {
+    if (session.user.id !== id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: params.id },
+      where: { id },
       select: {
         id: true,
         email: true,
@@ -47,7 +50,7 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -56,8 +59,10 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
+
     // Users can only update their own profile
-    if (session.user.id !== params.id) {
+    if (session.user.id !== id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -70,13 +75,13 @@ export async function PATCH(
     }
 
     const updatedUser = await prisma.user.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         name: name.trim(),
         // Note: You'll need to add these fields to your User model in schema.prisma
-        // phone: phone?.trim() || null,
-        // address: address?.trim() || null,  
-        // bio: bio?.trim() || null,
+        phone: phone?.trim() || null,
+        address: address?.trim() || null,  
+        bio: bio?.trim() || null,
       },
       select: {
         id: true,
@@ -85,9 +90,9 @@ export async function PATCH(
         role: true,
         createdAt: true,
         updatedAt: true,
-        // phone: true,
-        // address: true,
-        // bio: true,
+        phone: true,
+        address: true,
+        bio: true,
       }
     });
 
