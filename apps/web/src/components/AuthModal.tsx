@@ -51,8 +51,8 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }: AuthModalProps) =
         alert('Invalid credentials');
       } else {
         onClose();
-        // Optionally refresh the page to show updated auth state
-        window.location.reload();
+        // Redirect to dashboard after successful login
+        window.location.href = '/dashboard/profile';
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -105,7 +105,8 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }: AuthModalProps) =
           alert('Registration successful but login failed. Please login manually.');
         } else {
           onClose();
-          window.location.reload();
+          // Redirect to dashboard after successful registration and login
+          window.location.href = '/dashboard/profile';
         }
       } else {
         alert(data.error || 'Registration failed');

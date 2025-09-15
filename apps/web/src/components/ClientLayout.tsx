@@ -34,6 +34,9 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
               <Link href="/contact" className="text-white hover:text-[#0dcaf0] font-medium transition-colors">
                 Contact Us
               </Link>
+              <Link href="/dashboard/profile" className="text-white hover:text-[#0dcaf0] font-medium transition-colors">
+                My Profile
+              </Link>
             </div>
 
             <div className="flex items-center space-x-4">
