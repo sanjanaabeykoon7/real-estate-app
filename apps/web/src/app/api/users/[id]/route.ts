@@ -33,6 +33,9 @@ export async function GET(
         role: true,
         createdAt: true,
         updatedAt: true,
+        phone: true,
+        address: true,
+        bio: true,
         // Add any additional fields you want to expose
       }
     });

@@ -368,7 +368,7 @@ function PropertyCard({ listing, featured = false }: { listing: ListingWithOwner
         {/* Status Badge */}
         <div className="absolute top-2 left-2">
           <span className={twMerge(
-            "px-1.5 py-0.5 text-xs font-semibold rounded-full shadow-lg",
+            "px-1.5 py-0.5 text-[10.5px] font-semibold rounded-full shadow-lg",
             listing.status === 'ACTIVE' && "bg-green-500 text-white",
             listing.status === 'PENDING' && "bg-yellow-500 text-white",
             listing.status === 'SOLD' && "bg-red-500 text-white",
