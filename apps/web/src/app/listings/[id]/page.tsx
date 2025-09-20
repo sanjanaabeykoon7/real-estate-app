@@ -23,7 +23,7 @@ export default async function ListingPage({ params }: { params: { id: string } }
         />
         <div>
           <p className="text-2xl font-bold mb-2">LKR {listing.price.toLocaleString()}</p>
-          <p>{listing.beds} bed • {listing.baths} bath • {listing.sqft} sqft</p>
+          <p>{listing.beds} bedrooms • {listing.baths} bathrooms • {listing.sqft} sqft</p>
           <p className="mt-2 text-gray-600">{listing.description}</p>
           <p className="mt-4 text-sm">Listed by {listing.owner.name}</p>
         </div>

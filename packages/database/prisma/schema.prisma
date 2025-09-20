@@ -53,6 +53,7 @@ enum ListingStatus {
 model SavedProperty {
   userId    String
   listingId String
+  createdAt DateTime @default(now())
   listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
   user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
