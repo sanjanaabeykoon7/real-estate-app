@@ -99,7 +99,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <Link href="/" className="text-white hover:text-[#0dcaf0] font-medium transition-colors">
                 Home
               </Link>
-              <Link href="#listings" className="text-white hover:text-[#0dcaf0] font-medium transition-colors">
+              <Link href="/#listings" className="text-white hover:text-[#0dcaf0] font-medium transition-colors">
                 All Properties
               </Link>
               <Link href="/about" className="text-white hover:text-[#0dcaf0] font-medium transition-colors">

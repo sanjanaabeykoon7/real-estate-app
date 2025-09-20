@@ -65,3 +65,33 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export async function GET(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const listings = await prisma.listing.findMany({
+      where: {
+        ownerId: session.user.id
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    return NextResponse.json(listings);
+  } catch (error) {
+    console.error('Error fetching listings:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch listings' },
+      { status: 500 }
+    );
+  }
+}
