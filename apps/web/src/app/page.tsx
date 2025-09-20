@@ -5,6 +5,7 @@ import type { Prisma } from '@prisma/client';
 import SearchBar from '@/components/SearchBar';
 import PropertyImage from '@/components/PropertyImage';
 import { twMerge } from 'tailwind-merge';
+import FavoriteButton from '@/components/FavoriteButton';
 
 type ListingWithOwner = Prisma.ListingGetPayload<{
   include: { owner: { select: { name: true } } };
@@ -380,11 +381,7 @@ function PropertyCard({ listing, featured = false }: { listing: ListingWithOwner
 
         {/* Favorite/Save Button */}
         <div className="absolute top-2 right-2">
-          <button className="transition-all hover:scale-110 focus:outline-none cursor-pointer" title="Add to favorites">
-            <svg className="w-7 h-7 transition-all text-white/90 hover:text-red-500 drop-shadow-lg" fill="currentColor" stroke="none" viewBox="0 0 24 24">
-              <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-          </button>
+          <FavoriteButton listingId={listing.id} />
         </div>
 
         {/* Location */}
