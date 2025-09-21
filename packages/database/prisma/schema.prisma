@@ -12,6 +12,9 @@ model User {
   email     String          @unique
   password  String
   name      String
+  phone     String?         // Add this
+  address   String?         // Add this
+  bio       String?         // Add this
   role      Role            @default(USER)
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
@@ -50,6 +53,7 @@ enum ListingStatus {
 model SavedProperty {
   userId    String
   listingId String
+  createdAt DateTime @default(now())
   listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
   user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
