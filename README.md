@@ -1,4 +1,150 @@
-# Turborepo starter
+# Real Estate Hub
+
+A comprehensive real estate platform built as a monorepo using Turborepo. This application enables users to browse, list, and manage properties, with dedicated interfaces for web users and administrators. It includes features for property listings, user authentication, favorites management, and more.
+
+## Table of Contents
+
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Running the Application](#running-the-application)
+- [Project Structure](#project-structure)
+- [Database Management](#database-management)
+
+## Features
+
+- **Web Page + User Dashboard**: Browse properties, search by location/price/bedrooms, add to favorites, and manage personal profiles.
+- **Admin Dashboard**: Manage listings and users.
+- **Property Management**: Create, edit, and publish listings with image uploads via Cloudinary.
+- **Authentication**: Secure user registration and login using NextAuth with role-based access (User, Agent, Moderator, Super Admin).
+- **Favorites System**: Save and view favorite properties.
+- **Search and Filtering**: Advanced search capabilities for properties.
+- **Responsive Design**: Mobile-friendly UI using Tailwind CSS.
+- **Documentation App**: Built-in docs for development and usage reference.
+
+## Tech Stack
+
+### Frontend
+- **Framework**: Next.js 15 (with React)
+- **UI Library**: Custom React component library
+- **Styling**: Tailwind CSS with PostCSS
+
+### Backend
+- **Database**: PostgreSQL
+- **ORM**: Prisma
+- **Authentication**: NextAuth.js (with JWT)
+- **File Storage**: Cloudinary
+
+### Development & Architecture
+- **Monorepo Tool**: Turborepo
+- **Package Manager**: pnpm
+- **Language**: TypeScript
+- **State Management**: TanStack Query (React Query)
+- **Code Quality**: ESLint + Prettier with custom configurations
+
+### Infrastructure
+- **Build System**: Next.js with Turbopack
+- **Deployment**: 
+- **CI/CD**: 
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js >= 18
+- PostgreSQL database (local or hosted, e.g., via Docker)
+- Environment variables: Set up `.env` files in relevant apps/packages (e.g., `DATABASE_URL`, `NEXTAUTH_SECRET`, Cloudinary credentials)
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/sanjanaabeykoon7/real-estate-app.git
+   cd real-estate-app
+   ```
+
+2. Install dependencies:
+   ```bash
+   pnpm install
+   ```
+
+3. Set up the database:
+   - Update `DATABASE_URL` in `.env` (root or packages/database).
+   - Run migrations and seed:
+     ```bash
+     pnpm run db:migrate
+     pnpm run db:seed
+     ```
+
+### Running the Application
+
+- Start all apps in development mode:
+  ```bash
+  pnpm dev
+  ```
+
+- Individual apps:
+  - Web: `http://localhost:3002` (main user interface)
+  - Admin: `http://localhost:3003` (admin dashboard)
+  - Docs: `http://localhost:3001` (documentation)
+
+- Build for production:
+  ```bash
+  pnpm build
+  ```
+
+- Lint and type-check:
+  ```bash
+  pnpm lint
+  pnpm check-types
+  ```
+
+## Project Structure
+
+This is a Turborepo monorepo with the following structure:
+
+```
+├── README.md
+├── package.json
+├── pnpm-lock.yaml
+├── pnpm-workspace.yaml
+├── tsconfig.json
+├── turbo.json
+├── apps/
+│   ├── admin/          # Admin dashboard (Next.js)
+│   ├── docs/           # Documentation site (Next.js)
+│   └── web/            # Main web app (Next.js)
+└── packages/
+    ├── database/       # Prisma schema, migrations, and client
+    ├── eslint-config/  # Shared ESLint configurations
+    ├── typescript-config/ # Shared TypeScript configs
+    └── ui/             # Shared React UI components
+```
+
+- **apps/web**: Handles user-facing features like property browsing, favorites, and dashboards.
+- **apps/admin**: Admin tools for managing users and listings.
+- **packages/database**: Prisma setup with schema for Users, Listings, and SavedProperties.
+- **packages/ui**: Reusable components like `ImageUpload`.
+
+## Database Management
+
+- Schema: Defined in `packages/database/prisma/schema.prisma`.
+- Commands (from root):
+  - Generate client: `pnpm run db:generate`
+  - Push schema: `pnpm run db:push`
+  - Run migrations: `pnpm run db:migrate`
+  - Seed data: `pnpm run db:seed`
+  - Studio: `pnpm run db:studio` (Prisma Studio at http://localhost:5432)
+
+Default seeded users:
+- Admin: `admin@realestate.com` / `admin@1234` (SUPER_ADMIN)
+- Agent: `agent@realestate.com` / `agent@1234` (AGENT, with sample listings)
+
+---
+
+<!--# Turborepo starter
 
 This Turborepo starter is maintained by the Turborepo core team.
 
