@@ -27,11 +27,12 @@ A comprehensive real estate platform built as a monorepo using Turborepo. This a
 ## Tech Stack
 
 ### Frontend
-- **Framework**: Next.js 15 (with React)
+- **React Framework**: Next.js 15
 - **UI Library**: Custom React component library
-- **Styling**: Tailwind CSS with PostCSS
+- **Styling framework**: Tailwind CSS
 
 ### Backend
+- **Server-side API**: Next.js API Routes
 - **Database**: PostgreSQL
 - **ORM**: Prisma
 - **Authentication**: NextAuth.js (with JWT)
