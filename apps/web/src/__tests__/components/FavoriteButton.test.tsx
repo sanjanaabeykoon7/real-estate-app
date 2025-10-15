@@ -19,15 +19,12 @@ describe('FavoriteButton Component', () => {
   })
 
   it('toggles favorite status on click', async () => {
-    global.fetch = vi.fn()
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({ saved: false }),
-      })
-      .mockResolvedValueOnce({
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
         ok: true,
         json: () => Promise.resolve({ saved: true }),
       })
+    ) as any
 
     render(<FavoriteButton listingId="listing-123" />)
     

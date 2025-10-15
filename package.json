@@ -11,7 +11,11 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "db:generate": "pnpm --filter database db:generate",
+    "db:push": "pnpm --filter database db:push",
+    "db:seed": "pnpm --filter database db:seed",
+    "db:migrate": "pnpm --filter database db:migrate"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
