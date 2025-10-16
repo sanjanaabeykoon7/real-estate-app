@@ -7,7 +7,7 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
-    "db:seed": "tsx prisma/seed.ts",
+    "db:seed": "prisma db seed",
     "db:studio": "prisma studio"
   },
   "devDependencies": {
@@ -22,6 +22,6 @@
     "bcryptjs": "^3.0.2"
   },
   "prisma": {
-    "seed": "tsx ./prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts"
   }
 }
