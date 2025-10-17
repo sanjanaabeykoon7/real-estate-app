@@ -11,12 +11,18 @@ importers:
       '@tailwindcss/line-clamp':
         specifier: ^0.4.4
         version: 0.4.4(tailwindcss@4.1.11)
+      '@tailwindcss/postcss':
+        specifier: ^4
+        version: 4.1.11
       '@types/react':
         specifier: ^19.2.2
         version: 19.2.2
       '@types/react-dom':
         specifier: ^19.2.2
         version: 19.2.2(@types/react@19.2.2)
+      autoprefixer:
+        specifier: ^10.4.0
+        version: 10.4.21(postcss@8.5.6)
       bcryptjs:
         specifier: ^3.0.2
         version: 3.0.2
@@ -26,16 +32,19 @@ importers:
       next:
         specifier: 15.4.6
         version: 15.4.6(@babel/core@7.28.4)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      postcss:
+        specifier: ^8.4.0
+        version: 8.5.6
       react:
         specifier: '19'
         version: 19.1.0
       react-dom:
         specifier: '19'
         version: 19.1.0(react@19.1.0)
-    devDependencies:
-      '@tailwindcss/postcss':
+      tailwindcss:
         specifier: ^4
         version: 4.1.11
+    devDependencies:
       '@testing-library/jest-dom':
         specifier: ^6.9.1
         version: 6.9.1
@@ -60,24 +69,15 @@ importers:
       '@vitest/ui':
         specifier: ^3.2.4
         version: 3.2.4(vitest@3.2.4)
-      autoprefixer:
-        specifier: ^10.4.0
-        version: 10.4.21(postcss@8.5.6)
       cross-env:
         specifier: ^10.0.0
         version: 10.0.0
       jsdom:
         specifier: ^27.0.0
         version: 27.0.0(postcss@8.5.6)
-      postcss:
-        specifier: ^8.4.0
-        version: 8.5.6
       prettier:
         specifier: ^3.6.2
         version: 3.6.2
-      tailwindcss:
-        specifier: ^4
-        version: 4.1.11
       turbo:
         specifier: ^2.5.5
         version: 2.5.5
@@ -218,12 +218,18 @@ importers:
       '@tailwindcss/line-clamp':
         specifier: ^0.4.4
         version: 0.4.4(tailwindcss@4.1.11)
+      '@tailwindcss/postcss':
+        specifier: ^4
+        version: 4.1.11
       '@tanstack/react-query':
         specifier: ^5.85.2
         version: 5.85.2(react@19.1.0)
       '@types/bcryptjs':
         specifier: 2.4.6
         version: 2.4.6
+      autoprefixer:
+        specifier: ^10.4.0
+        version: 10.4.21(postcss@8.5.6)
       bcryptjs:
         specifier: 2.4.3
         version: 2.4.3
@@ -248,6 +254,9 @@ importers:
       next-auth:
         specifier: 4.24.11
         version: 4.24.11(next@15.4.6(@babel/core@7.28.4)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      postcss:
+        specifier: ^8.4.0
+        version: 8.5.6
       prisma:
         specifier: ^5.22.0
         version: 5.22.0
@@ -260,13 +269,13 @@ importers:
       tailwind-merge:
         specifier: ^3.3.1
         version: 3.3.1
+      tailwindcss:
+        specifier: ^4
+        version: 4.1.11
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3
         version: 3.3.1
-      '@tailwindcss/postcss':
-        specifier: ^4
-        version: 4.1.11
       '@types/node':
         specifier: ^20
         version: 20.19.10
@@ -282,9 +291,6 @@ importers:
       eslint-config-next:
         specifier: 15.4.6
         version: 15.4.6(eslint@9.31.0(jiti@2.5.1))(typescript@5.8.3)
-      tailwindcss:
-        specifier: ^4
-        version: 4.1.11
       typescript:
         specifier: ^5
         version: 5.8.3
