@@ -212,6 +212,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@eslint/eslintrc':
+        specifier: ^3
+        version: 3.3.1
       '@prisma/client':
         specifier: 5.22.0
         version: 5.22.0(prisma@5.22.0)
@@ -254,6 +257,12 @@ importers:
       database:
         specifier: ^0.0.2
         version: 0.0.2
+      eslint:
+        specifier: ^9
+        version: 9.31.0(jiti@2.5.1)
+      eslint-config-next:
+        specifier: 15.4.6
+        version: 15.4.6(eslint@9.31.0(jiti@2.5.1))(typescript@5.8.3)
       lucide-react:
         specifier: ^0.539.0
         version: 0.539.0(react@19.1.0)
@@ -284,16 +293,6 @@ importers:
       typescript:
         specifier: ^5
         version: 5.8.3
-    devDependencies:
-      '@eslint/eslintrc':
-        specifier: ^3
-        version: 3.3.1
-      eslint:
-        specifier: ^9
-        version: 9.31.0(jiti@2.5.1)
-      eslint-config-next:
-        specifier: 15.4.6
-        version: 15.4.6(eslint@9.31.0(jiti@2.5.1))(typescript@5.8.3)
 
   packages/database:
     dependencies:
