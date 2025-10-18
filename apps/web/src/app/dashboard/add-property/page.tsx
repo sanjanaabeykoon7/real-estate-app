@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Home, MapPin, DollarSign, Bed, Bath, Square, FileText, Image, Save, ArrowLeft, Upload, X, Eye, EyeOff } from 'lucide-react';
-import { ImageUpload } from '@/../../packages/ui/src/ImageUpload';
+import { ImageUpload } from '@repo/ui/ImageUpload';
 
 interface PropertyFormData {
   title: string;
@@ -74,14 +74,16 @@ export default function AddPropertyPage() {
     const { name, value, type } = e.target;
     
     if (name.startsWith('address.')) {
-      const addressField = name.split('.')[1];
-      setFormData(prev => ({
-        ...prev,
-        address: {
-          ...prev.address,
-          [addressField]: value
-        }
-      }));
+      const addressField = name.split('.')[1] as keyof PropertyFormData['address'];
+      if (addressField) {
+        setFormData(prev => ({
+          ...prev,
+          address: {
+            ...prev.address,
+            [addressField]: value
+          }
+        }));
+      }
     } else if (type === 'checkbox') {
       const target = e.target as HTMLInputElement;
       setFormData(prev => ({
