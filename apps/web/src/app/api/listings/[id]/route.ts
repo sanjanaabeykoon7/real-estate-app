@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { ApiError, errorResponse } from '@/lib/api/errors';
+import { deleteOwnedListing, updateOwnedListing } from '@/server/listings/service';
+import { validateUpdateListingInput } from '@/server/listings/validators';
 
 export async function PATCH(
   request: NextRequest,
@@ -13,44 +13,16 @@ export async function PATCH(
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      throw new ApiError(401, 'UNAUTHORIZED', 'Unauthorized');
     }
 
-    const body = await request.json();
     const listingId = params.id;
-
-    // Check if user owns the listing
-    const existingListing = await prisma.listing.findFirst({
-      where: {
-        id: listingId,
-        ownerId: session.user.id
-      }
-    });
-
-    if (!existingListing) {
-      return NextResponse.json(
-        { error: 'Listing not found or not authorized' },
-        { status: 404 }
-      );
-    }
-
-    const updatedListing = await prisma.listing.update({
-      where: {
-        id: listingId
-      },
-      data: body
-    });
+    const updateData = validateUpdateListingInput(await request.json());
+    const updatedListing = await updateOwnedListing(listingId, session.user.id, updateData);
 
     return NextResponse.json(updatedListing);
   } catch (error) {
-    console.error('Error updating listing:', error);
-    return NextResponse.json(
-      { error: 'Failed to update listing' },
-      { status: 500 }
-    );
+    return errorResponse(error);
   }
 }
 
@@ -62,41 +34,14 @@ export async function DELETE(
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      throw new ApiError(401, 'UNAUTHORIZED', 'Unauthorized');
     }
 
     const listingId = params.id;
-
-    // Check if user owns the listing
-    const existingListing = await prisma.listing.findFirst({
-      where: {
-        id: listingId,
-        ownerId: session.user.id
-      }
-    });
-
-    if (!existingListing) {
-      return NextResponse.json(
-        { error: 'Listing not found or not authorized' },
-        { status: 404 }
-      );
-    }
-
-    await prisma.listing.delete({
-      where: {
-        id: listingId
-      }
-    });
+    await deleteOwnedListing(listingId, session.user.id);
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting listing:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete listing' },
-      { status: 500 }
-    );
+    return errorResponse(error);
   }
 }

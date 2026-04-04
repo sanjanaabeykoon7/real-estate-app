@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { ApiError, errorResponse } from '@/lib/api/errors';
+import { getUserProfileForSelf, updateUserProfileForSelf } from '@/server/users/service';
+import { validateProfileUpdateInput } from '@/server/users/validators';
 
 export async function GET(
   request: NextRequest,
@@ -13,7 +13,7 @@ export async function GET(
     const session = await getServerSession(authOptions);
     
     if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new ApiError(401, 'UNAUTHORIZED', 'Unauthorized');
     }
 
     // Await params first
@@ -21,33 +21,14 @@ export async function GET(
 
     // Users can only access their own profile
     if (session.user.id !== id) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      throw new ApiError(403, 'FORBIDDEN', 'Forbidden');
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
-        phone: true,
-        address: true,
-        bio: true,
-        // Add any additional fields you want to expose
-      }
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
+    const user = await getUserProfileForSelf(id);
 
     return NextResponse.json(user);
   } catch (error) {
-    console.error('Error fetching user:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return errorResponse(error);
   }
 }
 
@@ -59,49 +40,21 @@ export async function PATCH(
     const session = await getServerSession(authOptions);
     
     if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new ApiError(401, 'UNAUTHORIZED', 'Unauthorized');
     }
 
     const { id } = await params;
 
     // Users can only update their own profile
     if (session.user.id !== id) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      throw new ApiError(403, 'FORBIDDEN', 'Forbidden');
     }
 
-    const body = await request.json();
-    const { name, phone, address, bio } = body;
-
-    // Validate input
-    if (!name || name.trim().length < 2) {
-      return NextResponse.json({ error: 'Name must be at least 2 characters' }, { status: 400 });
-    }
-
-    const updatedUser = await prisma.user.update({
-      where: { id },
-      data: {
-        name: name.trim(),
-        // Note: You'll need to add these fields to your User model in schema.prisma
-        phone: phone?.trim() || null,
-        address: address?.trim() || null,  
-        bio: bio?.trim() || null,
-      },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
-        phone: true,
-        address: true,
-        bio: true,
-      }
-    });
+    const input = validateProfileUpdateInput(await request.json());
+    const updatedUser = await updateUserProfileForSelf(id, input);
 
     return NextResponse.json(updatedUser);
   } catch (error) {
-    console.error('Error updating user:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return errorResponse(error);
   }
 }
