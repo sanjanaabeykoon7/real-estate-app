@@ -1,20 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]/route';
-import { ApiError, errorResponse } from '@/lib/api/errors';
+import { errorResponse } from '@/lib/api/errors';
+import { requireAdminUser } from '@/lib/api/auth';
 import { createUser, listUsers } from '@/server/users/service';
 import { validateCreateUserInput } from '@/server/users/validators';
 
-function assertAdminOrModerator(session: any) {
-  if (!session || ((session.user as any).role !== 'SUPER_ADMIN' && (session.user as any).role !== 'MODERATOR')) {
-    throw new ApiError(401, 'UNAUTHORIZED', 'Unauthorized');
-  }
-}
-
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    assertAdminOrModerator(session);
+    await requireAdminUser();
 
     const users = await listUsers();
 
@@ -26,8 +18,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    assertAdminOrModerator(session);
+    await requireAdminUser();
 
     const input = validateCreateUserInput(await request.json());
     const user = await createUser(input);
