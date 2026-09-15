@@ -1,27 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { ApiError, errorResponse } from '@/lib/api/errors';
+import { requireAuthenticatedUser } from '@/lib/api/auth';
+import { parseJsonBody, requireQueryParam } from '@/lib/api/request';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const user = await requireAuthenticatedUser();
 
-    const { listingId } = await request.json();
+    const { listingId } = await parseJsonBody<{ listingId?: string }>(request);
 
     if (!listingId) {
-      return NextResponse.json({ error: 'Listing ID is required' }, { status: 400 });
+      throw new ApiError(400, 'VALIDATION_ERROR', 'Listing ID is required');
     }
 
     // Check if already saved
     const existing = await prisma.savedProperty.findUnique({
       where: {
         userId_listingId: {
-          userId: session.user.id,
+          userId: user.id,
           listingId: listingId
         }
       }
@@ -32,7 +29,7 @@ export async function POST(request: NextRequest) {
       await prisma.savedProperty.delete({
         where: {
           userId_listingId: {
-            userId: session.user.id,
+            userId: user.id,
             listingId: listingId
           }
         }
@@ -42,37 +39,26 @@ export async function POST(request: NextRequest) {
       // Add to favorites
       await prisma.savedProperty.create({
         data: {
-          userId: session.user.id,
+          userId: user.id,
           listingId: listingId
         }
       });
       return NextResponse.json({ saved: true });
     }
   } catch (error) {
-    console.error('Favorites error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return errorResponse(error);
   }
 }
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { searchParams } = new URL(request.url);
-    const listingId = searchParams.get('listingId');
-
-    if (!listingId) {
-      return NextResponse.json({ error: 'Listing ID is required' }, { status: 400 });
-    }
+    const user = await requireAuthenticatedUser();
+    const listingId = requireQueryParam(request, 'listingId');
 
     const saved = await prisma.savedProperty.findUnique({
       where: {
         userId_listingId: {
-          userId: session.user.id,
+          userId: user.id,
           listingId: listingId
         }
       }
@@ -80,7 +66,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ saved: !!saved });
   } catch (error) {
-    console.error('Favorites check error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return errorResponse(error);
   }
 }
