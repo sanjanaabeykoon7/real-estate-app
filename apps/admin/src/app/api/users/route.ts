@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { errorResponse } from '@/lib/api/errors';
 import { requireAdminUser } from '@/lib/api/auth';
+import { parseJsonBody } from '@/lib/api/request';
 import { createUser, listUsers } from '@/server/users/service';
 import { validateCreateUserInput } from '@/server/users/validators';
 
@@ -20,7 +21,8 @@ export async function POST(request: NextRequest) {
   try {
     await requireAdminUser();
 
-    const input = validateCreateUserInput(await request.json());
+    const body = await parseJsonBody<unknown>(request);
+    const input = validateCreateUserInput(body);
     const user = await createUser(input);
 
     return NextResponse.json(user, { status: 201 });

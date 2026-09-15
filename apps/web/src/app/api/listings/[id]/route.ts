@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { errorResponse } from '@/lib/api/errors';
 import { requireAuthenticatedUser } from '@/lib/api/auth';
+import { parseJsonBody } from '@/lib/api/request';
 import { deleteOwnedListing, updateOwnedListing } from '@/server/listings/service';
 import { validateUpdateListingInput } from '@/server/listings/validators';
 
@@ -12,7 +13,8 @@ export async function PATCH(
     const user = await requireAuthenticatedUser();
 
     const listingId = params.id;
-    const updateData = validateUpdateListingInput(await request.json());
+    const body = await parseJsonBody<unknown>(request);
+    const updateData = validateUpdateListingInput(body);
     const updatedListing = await updateOwnedListing(listingId, user.id, updateData);
 
     return NextResponse.json(updatedListing);

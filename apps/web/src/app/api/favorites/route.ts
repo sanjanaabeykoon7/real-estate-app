@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ApiError, errorResponse } from '@/lib/api/errors';
 import { requireAuthenticatedUser } from '@/lib/api/auth';
+import { parseJsonBody, requireQueryParam } from '@/lib/api/request';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAuthenticatedUser();
 
-    const { listingId } = await request.json();
+    const { listingId } = await parseJsonBody<{ listingId?: string }>(request);
 
     if (!listingId) {
       throw new ApiError(400, 'VALIDATION_ERROR', 'Listing ID is required');
@@ -52,13 +53,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const user = await requireAuthenticatedUser();
-
-    const { searchParams } = new URL(request.url);
-    const listingId = searchParams.get('listingId');
-
-    if (!listingId) {
-      throw new ApiError(400, 'VALIDATION_ERROR', 'Listing ID is required');
-    }
+    const listingId = requireQueryParam(request, 'listingId');
 
     const saved = await prisma.savedProperty.findUnique({
       where: {
