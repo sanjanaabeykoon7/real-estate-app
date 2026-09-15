@@ -1,85 +1,49 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@repo/database/lib/prisma';
+import { errorResponse } from '@/lib/api/errors';
+import { requireAdminUser } from '@/lib/api/auth';
+import { parseJsonBody, resolveParams } from '@/lib/api/request';
+import { deleteListing, getListingById, updateListing } from '@/server/listings/service';
+import { validateAdminUpdateListingInput } from '@/server/listings/validators';
 
-// GET - Get single listing (optional)
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+type RouteContext = { params: Promise<{ id: string }> };
+
+export async function GET(request: NextRequest, { params }: RouteContext) {
   try {
-    const { id } = await params; // Await params in Next.js 15
-    
-    const listing = await prisma.listing.findUnique({
-      where: { id },
-      include: { owner: true }
-    });
-    
-    if (!listing) {
-      return NextResponse.json({ error: 'Listing not found' }, { status: 404 });
-    }
-    
+    await requireAdminUser();
+
+    const { id } = await resolveParams(params);
+    const listing = await getListingById(id);
+
     return NextResponse.json(listing);
   } catch (error) {
-    console.error('Error fetching listing:', error);
-    return NextResponse.json({ error: 'Failed to fetch listing' }, { status: 500 });
+    return errorResponse(error);
   }
 }
 
-// PUT - Update listing
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(request: NextRequest, { params }: RouteContext) {
   try {
-    const { id } = await params; // Await params in Next.js 15
-    const data = await request.json();
-    
-    // Map frontend status values to Prisma enum values
-    const statusMap: { [key: string]: string } = {
-      'active': 'ACTIVE',
-      'pending': 'PENDING', 
-      'sold': 'SOLD',
-      'inactive': 'INACTIVE'
-    };
-    
-    const updatedListing = await prisma.listing.update({
-      where: { id },
-      data: {
-        title: data.title,
-        description: data.description,
-        price: data.price,
-        beds: data.beds,
-        baths: data.baths,
-        sqft: data.sqft,
-        location: data.location,
-        status: statusMap[data.status] || data.status, // Map to enum value
-        published: data.published
-      },
-      include: { owner: true }
-    });
-    
-    return NextResponse.json(updatedListing);
+    await requireAdminUser();
+
+    const { id } = await resolveParams(params);
+    const body = await parseJsonBody<unknown>(request);
+    const input = validateAdminUpdateListingInput(body);
+    const listing = await updateListing(id, input);
+
+    return NextResponse.json(listing);
   } catch (error) {
-    console.error('Error updating listing:', error);
-    return NextResponse.json({ error: 'Failed to update listing' }, { status: 500 });
+    return errorResponse(error);
   }
 }
 
-// DELETE - Delete listing  
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(request: NextRequest, { params }: RouteContext) {
   try {
-    const { id } = await params; // Await params in Next.js 15
-    
-    await prisma.listing.delete({
-      where: { id }
-    });
-    
+    await requireAdminUser();
+
+    const { id } = await resolveParams(params);
+    await deleteListing(id);
+
     return NextResponse.json({ message: 'Listing deleted successfully' });
   } catch (error) {
-    console.error('Error deleting listing:', error);
-    return NextResponse.json({ error: 'Failed to delete listing' }, { status: 500 });
+    return errorResponse(error);
   }
 }
