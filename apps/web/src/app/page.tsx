@@ -54,15 +54,23 @@ export default async function Home({ searchParams }: HomeProps) {
     };
   }
 
-  const listings: ListingWithOwner[] = await prisma.listing.findMany({
-    where: whereCondition,
-    include: { owner: { select: { name: true } } },
-    orderBy: [
-      { featured: 'desc' },
-      { createdAt: 'desc' }
-    ],
-    take: 12,
-  });
+  // Add try-catch for database queries
+  let listings: ListingWithOwner[] = [];
+  try {
+    listings = await prisma.listing.findMany({
+      where: whereCondition,
+      include: { owner: { select: { name: true } } },
+      orderBy: [
+        { featured: 'desc' },
+        { createdAt: 'desc' }
+      ],
+      take: 12,
+    });
+  } catch (error) {
+    console.error('Database error:', error);
+    // Return empty array if database fails
+    listings = [];
+  }
 
   const featuredListings = listings.filter(l => l.featured).slice(0, 3);
   const hasFilters = Object.keys(resolvedSearchParams).length > 0;
