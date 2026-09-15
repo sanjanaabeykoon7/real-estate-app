@@ -1,4 +1,3 @@
-import { prisma } from '@/lib/prisma';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Prisma } from '@prisma/client';
@@ -6,70 +5,26 @@ import SearchBar from '@/components/SearchBar';
 import PropertyImage from '@/components/PropertyImage';
 import { twMerge } from 'tailwind-merge';
 import FavoriteButton from '@/components/FavoriteButton';
+import { getPublishedListings } from '@/server/listings/service';
+import { parseListingSearchParams } from '@/server/listings/validators';
 
 type ListingWithOwner = Prisma.ListingGetPayload<{
   include: { owner: { select: { name: true } } };
 }>;
 
 interface HomeProps {
-  searchParams: {
-    city?: string;
-    minPrice?: string;
-    maxPrice?: string;
-    beds?: string;
-  };
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export default async function Home({ searchParams }: HomeProps) {
   const resolvedSearchParams = await searchParams;
-  // Build filter conditions
-  const whereCondition: any = {
-    published: true,
-  };
+  const filters = parseListingSearchParams(resolvedSearchParams);
 
-  if (resolvedSearchParams.city) {
-    whereCondition.address = {
-      path: ['city'],
-      string_contains: resolvedSearchParams.city,
-    };
-  }
-
-  if (resolvedSearchParams.minPrice) {
-    whereCondition.price = {
-      ...whereCondition.price,
-      gte: parseInt(resolvedSearchParams.minPrice),
-    };
-  }
-
-  if (resolvedSearchParams.maxPrice) {
-    whereCondition.price = {
-      ...whereCondition.price,
-      lte: parseInt(resolvedSearchParams.maxPrice),
-    };
-  }
-
-  if (resolvedSearchParams.beds) {
-    whereCondition.beds = {
-      gte: parseInt(resolvedSearchParams.beds),
-    };
-  }
-
-  // Add try-catch for database queries
   let listings: ListingWithOwner[] = [];
   try {
-    listings = await prisma.listing.findMany({
-      where: whereCondition,
-      include: { owner: { select: { name: true } } },
-      orderBy: [
-        { featured: 'desc' },
-        { createdAt: 'desc' }
-      ],
-      take: 12,
-    });
+    listings = await getPublishedListings(filters);
   } catch (error) {
     console.error('Database error:', error);
-    // Return empty array if database fails
-    listings = [];
   }
 
   const featuredListings = listings.filter(l => l.featured).slice(0, 3);

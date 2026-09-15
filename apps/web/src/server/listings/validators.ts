@@ -129,3 +129,24 @@ export function validateUpdateListingInput(body: unknown) {
 
   return data;
 }
+
+function asOptionalNonNegativeInt(value: unknown) {
+  if (typeof value !== 'string' || value.trim() === '') return undefined;
+  const n = Number(value);
+  return Number.isInteger(n) && n >= 0 ? n : undefined;
+}
+
+/**
+ * Sanitizes public search query params. Invalid values are dropped rather than
+ * rejected so a bad URL still renders the page.
+ */
+export function parseListingSearchParams(params: Record<string, string | string[] | undefined>) {
+  const city = typeof params.city === 'string' ? params.city.trim().slice(0, 100) : '';
+
+  return {
+    city: city || undefined,
+    minPrice: asOptionalNonNegativeInt(params.minPrice),
+    maxPrice: asOptionalNonNegativeInt(params.maxPrice),
+    beds: asOptionalNonNegativeInt(params.beds),
+  };
+}

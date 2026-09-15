@@ -58,3 +58,44 @@ export async function deleteOwnedListing(listingId: string, ownerId: string) {
 
   await prisma.listing.delete({ where: { id: listingId } });
 }
+
+export type ListingSearchFilters = {
+  city?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  beds?: number;
+};
+
+export async function getPublishedListings(filters: ListingSearchFilters, limit = 12) {
+  const where: Prisma.ListingWhereInput = { published: true };
+
+  if (filters.city) {
+    where.address = { path: ['city'], string_contains: filters.city };
+  }
+  if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
+    where.price = { gte: filters.minPrice, lte: filters.maxPrice };
+  }
+  if (filters.beds !== undefined) {
+    where.beds = { gte: filters.beds };
+  }
+
+  return prisma.listing.findMany({
+    where,
+    include: { owner: { select: { name: true } } },
+    orderBy: [{ featured: 'desc' }, { createdAt: 'desc' }],
+    take: limit,
+  });
+}
+
+/**
+ * Public listing detail. Unpublished listings are only visible to their owner.
+ */
+export async function getListingForPublicView(listingId: string, viewerId?: string) {
+  return prisma.listing.findFirst({
+    where: {
+      id: listingId,
+      OR: [{ published: true }, ...(viewerId ? [{ ownerId: viewerId }] : [])],
+    },
+    include: { owner: { select: { name: true, email: true, phone: true } } },
+  });
+}
