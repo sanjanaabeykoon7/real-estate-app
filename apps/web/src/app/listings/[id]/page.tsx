@@ -1,10 +1,12 @@
-import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Prisma } from '@prisma/client';
 import PropertyImage from '@/components/PropertyImage';
 import FavoriteButton from '@/components/FavoriteButton';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { getListingForPublicView } from '@/server/listings/service';
 import { MapPin, Bed, Bath, Square, Calendar, User, Phone, Mail, ArrowLeft, CheckCircle, AlertCircle, Clock, XCircle, Share2, Camera } from 'lucide-react';
 
 type ListingWithOwner = Prisma.ListingGetPayload<{
@@ -12,26 +14,14 @@ type ListingWithOwner = Prisma.ListingGetPayload<{
 }>;
 
 interface PropertyPageProps {
-  params: {
-    id: string;
-  };
+  params: Promise<{ id: string }>;
 }
 
 export default async function PropertyPage({ params }: PropertyPageProps) {
   const { id } = await params;
 
-  const listing: ListingWithOwner | null = await prisma.listing.findUnique({
-    where: { id },
-    include: { 
-      owner: { 
-        select: { 
-          name: true, 
-          email: true, 
-          phone: true 
-        } 
-      } 
-    },
-  });
+  const session = await getServerSession(authOptions);
+  const listing: ListingWithOwner | null = await getListingForPublicView(id, session?.user?.id);
 
   if (!listing) {
     notFound();

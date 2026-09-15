@@ -1,46 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { errorResponse } from '@/lib/api/errors';
 import { requireAuthenticatedUser } from '@/lib/api/auth';
-import { prisma } from '@/lib/prisma';
+import { getSavedListingsForUser } from '@/server/favorites/service';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const user = await requireAuthenticatedUser();
 
-    const savedProperties = await prisma.savedProperty.findMany({
-      where: {
-        userId: user.id
-      },
-      include: {
-        listing: {
-          include: {
-            owner: {
-              select: {
-                id: true,
-                name: true,
-                email: true
-              }
-            }
-          }
-        }
-      },
-      orderBy: {
-        // This will order by when the property was saved
-        listing: {
-          createdAt: 'desc'
-        }
-      }
-    });
+    const savedListings = await getSavedListingsForUser(user.id);
 
-    // Transform the data to match our expected structure
-    const transformedData = savedProperties.map(saved => ({
-      id: `${saved.userId}-${saved.listingId}`, // Composite ID for the saved property
-      listingId: saved.listingId,
-      savedAt: saved.createdAt,
-      listing: saved.listing
-    }));
-
-    return NextResponse.json(transformedData);
+    return NextResponse.json(savedListings);
   } catch (error) {
     return errorResponse(error);
   }
