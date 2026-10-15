@@ -1,0 +1,15 @@
+**/node_modules
+node_modules
+.pnpm-store
+**/.next
+.next
+.turbo
+**/.turbo
+coverage
+dist
+out
+.git
+.env
+.env.*
+!.env.example
+*.log

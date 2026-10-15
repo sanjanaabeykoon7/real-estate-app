@@ -1,11 +1,11 @@
 'use client';
 import type { Session } from "next-auth";
 import { signIn, getSession } from 'next-auth/react';
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, Building2, Shield, Mail, Lock, ArrowRight, AlertCircle, Home } from 'lucide-react';
 
-export default function LoginPage() {
+function LoginPageContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -32,8 +32,8 @@ export default function LoginPage() {
           setError('Access denied. Admin privileges required.');
           break;
         default:
-          setError('An error occurred during sign in');
-      }
+            setError('An error occurred during sign in');
+        }
     }
   }, [searchParams]);
 
@@ -287,5 +287,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPageContent />
+    </Suspense>
   );
 }

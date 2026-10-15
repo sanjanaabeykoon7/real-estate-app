@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: real-estate-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: devpass
+      POSTGRES_DB: realestate
+    ports:
+      - "5433:5432"
+    volumes:
+      - real_estate_postgres_data:/var/lib/postgresql
+
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile
+    container_name: real-estate-admin
+    restart: unless-stopped
+    env_file:
+      - apps/admin/.env.docker
+    environment:
+      DATABASE_URL: postgresql://dev:devpass@postgres:5432/realestate
+      NEXTAUTH_URL: http://localhost:3003
+    ports:
+      - "3003:3003"
+    depends_on:
+      - postgres
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: real-estate-web
+    restart: unless-stopped
+    env_file:
+      - apps/web/.env.docker
+    environment:
+      DATABASE_URL: postgresql://dev:devpass@postgres:5432/realestate
+      NEXTAUTH_URL: http://localhost:3002
+    ports:
+      - "3002:3002"
+    depends_on:
+      - postgres
+
+volumes:
+  real_estate_postgres_data:

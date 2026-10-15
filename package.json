@@ -12,17 +12,18 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
     "test:run": "vitest run",
+    "test:e2e": "playwright test",
     "db:generate": "pnpm --filter database db:generate",
     "db:push": "pnpm --filter database db:push",
     "db:seed": "pnpm --filter database db:seed",
     "db:migrate": "pnpm --filter database db:migrate"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/node": "^24.3.0",
-    "@types/testing-library__jest-dom": "^6.0.0",
     "@vitejs/plugin-react": "^5.0.4",
     "@vitest/coverage-v8": "3.2.4",
     "@vitest/ui": "^3.2.4",
@@ -42,13 +43,13 @@
     "@tailwindcss/postcss": "^4",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
+    "autoprefixer": "^10.4.0",
     "bcryptjs": "^3.0.2",
     "lucide-react": "^0.539.0",
     "next": "15.5.25",
+    "postcss": "^8.4.0",
     "react": "19",
     "react-dom": "19",
-    "tailwindcss": "^4",
-    "postcss": "^8.4.0",
-    "autoprefixer": "^10.4.0"
+    "tailwindcss": "^4"
   }
 }
