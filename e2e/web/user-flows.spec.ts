@@ -24,7 +24,9 @@ test('user can register an account', async ({ page }) => {
   await page.getByRole('button', { name: 'Register' }).click();
 
   await expect(page).toHaveURL(/\/dashboard\/profile/);
-  await expect(page.getByRole('heading', { name: 'Playwright User' })).toBeVisible();
+  await expect(
+    page.getByRole('main').getByRole('heading', { name: 'Playwright User' }),
+  ).toBeVisible();
 });
 
 test('user can log in and log out', async ({ page }) => {
