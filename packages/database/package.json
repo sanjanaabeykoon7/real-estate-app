@@ -8,6 +8,7 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
+    "db:seed:test": "tsx prisma/seed-test.ts",
     "db:studio": "prisma studio"
   },
   "devDependencies": {

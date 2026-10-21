@@ -12,7 +12,7 @@ describe('Listing Flow Integration', () => {
           published: true
         }),
       })
-    ) as any
+    ) as typeof fetch
 
     const listingData = {
       title: 'Test Property',

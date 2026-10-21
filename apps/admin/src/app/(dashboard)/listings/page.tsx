@@ -87,7 +87,7 @@ export default function ListingsPage() {
       return { paginatedListings: [], totalPages: 0, startIndex: 0, endIndex: 0, totalFiltered: 0 };
     }
     
-    let filtered = data.filter((listing: any) => {
+    const filtered = data.filter((listing: any) => {
       const matchesSearch = 
         listing.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         listing.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -361,7 +361,7 @@ export default function ListingsPage() {
               Showing {startIndex + 1} to {endIndex} of {totalFiltered} results
               {searchQuery && (
                 <span className="ml-2 text-blue-600">
-                  for "{searchQuery}"
+                  for &quot;{searchQuery}&quot;
                 </span>
               )}
             </div>
@@ -1002,7 +1002,7 @@ export default function ListingsPage() {
               </button>
             </div>
             <p className="text-gray-600 mb-6">
-              Are you sure you want to delete "{deleteModal.title}"? This action cannot be undone.
+              Are you sure you want to delete &quot;{deleteModal.title}&quot;? This action cannot be undone.
             </p>
             <div className="flex gap-3">
               <button

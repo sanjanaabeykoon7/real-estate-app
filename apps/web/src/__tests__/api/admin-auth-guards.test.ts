@@ -31,7 +31,7 @@ describe('Admin API Auth Guards', () => {
   it('allows SUPER_ADMIN', async () => {
     vi.mocked(getServerSession).mockResolvedValue({
       user: { id: 'admin-1', role: 'SUPER_ADMIN', email: 'a@test.com', name: 'Admin' },
-    } as any);
+    } as Awaited<ReturnType<typeof getServerSession>>);
 
     const user = await requireAdminUser();
     expect(user.id).toBe('admin-1');
@@ -40,7 +40,7 @@ describe('Admin API Auth Guards', () => {
   it('allows MODERATOR', async () => {
     vi.mocked(getServerSession).mockResolvedValue({
       user: { id: 'mod-1', role: 'MODERATOR', email: 'm@test.com', name: 'Mod' },
-    } as any);
+    } as Awaited<ReturnType<typeof getServerSession>>);
 
     const user = await requireAdminUser();
     expect(user.id).toBe('mod-1');
@@ -49,7 +49,7 @@ describe('Admin API Auth Guards', () => {
   it('rejects USER role', async () => {
     vi.mocked(getServerSession).mockResolvedValue({
       user: { id: 'user-1', role: 'USER', email: 'u@test.com', name: 'User' },
-    } as any);
+    } as Awaited<ReturnType<typeof getServerSession>>);
 
     await expect(requireAdminUser()).rejects.toMatchObject({
       status: 401,

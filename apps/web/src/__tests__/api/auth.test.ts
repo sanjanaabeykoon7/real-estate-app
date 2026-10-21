@@ -21,7 +21,7 @@ describe('Authentication API', () => {
           user: { ...mockUser, id: '123', password: undefined }
         }),
       })
-    ) as any
+    ) as typeof fetch
 
     const response = await fetch('/api/auth/register', {
       method: 'POST',
@@ -42,7 +42,7 @@ describe('Authentication API', () => {
         ok: false,
         json: () => Promise.resolve({ error: 'User already exists' }),
       })
-    ) as any
+    ) as typeof fetch
 
     const response = await fetch('/api/auth/register', {
       method: 'POST',

@@ -35,7 +35,7 @@ async function main() {
 
   // Create demo agent (only in non-production)
   if (process.env.NODE_ENV !== 'production') {
-    const agentEmail = 'agent@realestate.com';
+    const agentEmail = process.env.DEMO_AGENT_EMAIL || 'agent@realestate.com';
     const existingAgent = await prisma.user.findUnique({
       where: { email: agentEmail }
     });

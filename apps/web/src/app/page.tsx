@@ -155,7 +155,7 @@ export default async function Home({ searchParams }: HomeProps) {
               </div>
               <h3 className="text-3xl font-bold text-gray-900 mb-4">No Properties Found</h3>
               <p className="text-gray-600 mb-8 text-lg max-w-xl mx-auto">
-                We couldn't find any properties matching your search criteria. Try adjusting filters or browse all available properties.
+                We couldn&apos;t find any properties matching your search criteria. Try adjusting filters or browse all available properties.
               </p>
               <div className="mt-4">
                 <Link
@@ -199,7 +199,7 @@ export default async function Home({ searchParams }: HomeProps) {
                 Your Trusted Real Estate Partner
               </h2>
               <p className="text-xl text-gray-600 max-w-4xl mx-auto">
-                With years of experience and thousands of successful transactions, we're committed to making your real estate journey seamless and rewarding
+                With years of experience and thousands of successful transactions, we&apos;re committed to making your real estate journey seamless and rewarding
               </p>
             </div>
 

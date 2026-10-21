@@ -113,7 +113,7 @@ export default function FavoritesPage() {
   };
 
   const getFilteredAndSortedListings = () => {
-    let filtered = savedListings.filter(saved => {
+    const filtered = savedListings.filter(saved => {
       const listing = saved.listing;
       const matchesSearch = listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            listing.address.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -239,7 +239,7 @@ export default function FavoritesPage() {
             <Heart size={32} className="mr-3 text-red-500" />
             My Favorites
           </h1>
-          <p className="text-gray-600 mt-1">Properties you've saved for later</p>
+          <p className="text-gray-600 mt-1">Properties you&apos;ve saved for later</p>
         </div>
         <Link
           href="/"
