@@ -11,6 +11,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: [['html', { outputFolder: 'playwright-report', open: 'never' }]],
+  globalTeardown: './e2e/global-teardown.ts',
   use: {
     baseURL: webBaseURL,
     trace: 'retain-on-failure',
