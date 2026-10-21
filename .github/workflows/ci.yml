@@ -28,6 +28,32 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Create CI-only Docker environment files
+        shell: bash
+        run: |
+          cat > apps/web/.env.docker <<'EOF'
+          DATABASE_URL=postgresql://dev:devpass@postgres:5432/realestate
+          NEXTAUTH_URL=http://localhost:3002
+          NEXTAUTH_SECRET=ci-only-web-secret
+          ADMIN_EMAIL=admin@test.example
+          ADMIN_PASSWORD=test-admin-password
+          DEMO_AGENT_EMAIL=agent@test.example
+          DEMO_AGENT_PASSWORD=test-agent-password
+          EOF
+
+          cat > apps/admin/.env.docker <<'EOF'
+          DATABASE_URL=postgresql://dev:devpass@postgres:5432/realestate
+          NEXTAUTH_URL=http://localhost:3003
+          NEXTAUTH_SECRET=ci-only-admin-secret
+          ADMIN_EMAIL=admin@test.example
+          ADMIN_PASSWORD=test-admin-password
+          DEMO_AGENT_EMAIL=agent@test.example
+          DEMO_AGENT_PASSWORD=test-agent-password
+          CLOUDINARY_CLOUD_NAME=ci
+          CLOUDINARY_API_KEY=ci
+          CLOUDINARY_API_SECRET=ci
+          EOF
+
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -50,30 +76,6 @@ jobs:
 
       - name: Run Vitest tests
         run: pnpm test:run
-
-      - name: Create CI-only Docker environment files
-        shell: bash
-        run: |
-          cat > apps/web/.env.docker <<'EOF'
-          DATABASE_URL=postgresql://dev:devpass@postgres:5432/realestate
-          NEXTAUTH_URL=http://localhost:3002
-          NEXTAUTH_SECRET=ci-only-web-secret
-          ADMIN_EMAIL=admin@test.example
-          ADMIN_PASSWORD=test-admin-password
-          DEMO_AGENT_PASSWORD=test-agent-password
-          EOF
-
-          cat > apps/admin/.env.docker <<'EOF'
-          DATABASE_URL=postgresql://dev:devpass@postgres:5432/realestate
-          NEXTAUTH_URL=http://localhost:3003
-          NEXTAUTH_SECRET=ci-only-admin-secret
-          ADMIN_EMAIL=admin@test.example
-          ADMIN_PASSWORD=test-admin-password
-          DEMO_AGENT_PASSWORD=test-agent-password
-          CLOUDINARY_CLOUD_NAME=ci
-          CLOUDINARY_API_KEY=ci
-          CLOUDINARY_API_SECRET=ci
-          EOF
 
       - name: Build Docker images
         run: docker compose build
