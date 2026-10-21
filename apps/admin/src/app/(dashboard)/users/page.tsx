@@ -107,7 +107,7 @@ export default function UsersPage() {
       return { paginatedUsers: [], totalPages: 0, startIndex: 0, endIndex: 0, totalFiltered: 0 };
     }
     
-    let filtered = users.filter((user: User) => {
+    const filtered = users.filter((user: User) => {
       const matchesSearch = 
         user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.email?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -374,7 +374,7 @@ export default function UsersPage() {
               Showing {startIndex + 1} to {endIndex} of {totalFiltered} users
               {searchQuery && (
                 <span className="ml-2 text-blue-600">
-                  for "{searchQuery}"
+                  for &quot;{searchQuery}&quot;
                 </span>
               )}
             </div>
@@ -849,7 +849,7 @@ export default function UsersPage() {
               </button>
             </div>
             <p className="text-gray-600 mb-6">
-              Are you sure you want to delete user <strong>"{deleteModal.name}"</strong>? 
+              Are you sure you want to delete user <strong>&quot;{deleteModal.name}&quot;</strong>?
               {deleteModal._count?.listings && deleteModal._count.listings > 0 && (
                 <span className="block mt-2 text-red-600">
                   Warning: This user has {deleteModal._count.listings} listings that will need to be reassigned.

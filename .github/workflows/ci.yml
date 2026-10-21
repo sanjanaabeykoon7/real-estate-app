@@ -1,0 +1,134 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  CI: true
+  PLAYWRIGHT_WEB_BASE_URL: http://localhost:3002
+  PLAYWRIGHT_ADMIN_BASE_URL: http://localhost:3003
+  PLAYWRIGHT_ADMIN_EMAIL: admin@test.example
+  PLAYWRIGHT_ADMIN_PASSWORD: test-admin-password
+  PLAYWRIGHT_AGENT_EMAIL: agent@test.example
+  PLAYWRIGHT_AGENT_PASSWORD: test-agent-password
+  PLAYWRIGHT_DATABASE_CONTAINER: real-estate-postgres
+  PLAYWRIGHT_DATABASE_USER: dev
+  PLAYWRIGHT_DATABASE_NAME: realestate
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run linting
+        run: pnpm lint
+
+      - name: Run type checks
+        run: pnpm check-types
+
+      - name: Run Vitest tests
+        run: pnpm test:run
+
+      - name: Create CI-only Docker environment files
+        shell: bash
+        run: |
+          cat > apps/web/.env.docker <<'EOF'
+          DATABASE_URL=postgresql://dev:devpass@postgres:5432/realestate
+          NEXTAUTH_URL=http://localhost:3002
+          NEXTAUTH_SECRET=ci-only-web-secret
+          ADMIN_EMAIL=admin@test.example
+          ADMIN_PASSWORD=test-admin-password
+          DEMO_AGENT_PASSWORD=test-agent-password
+          EOF
+
+          cat > apps/admin/.env.docker <<'EOF'
+          DATABASE_URL=postgresql://dev:devpass@postgres:5432/realestate
+          NEXTAUTH_URL=http://localhost:3003
+          NEXTAUTH_SECRET=ci-only-admin-secret
+          ADMIN_EMAIL=admin@test.example
+          ADMIN_PASSWORD=test-admin-password
+          DEMO_AGENT_PASSWORD=test-agent-password
+          CLOUDINARY_CLOUD_NAME=ci
+          CLOUDINARY_API_KEY=ci
+          CLOUDINARY_API_SECRET=ci
+          EOF
+
+      - name: Build Docker images
+        run: docker compose build
+
+      - name: Start Docker Compose services
+        run: docker compose up -d postgres
+
+      - name: Initialize and seed CI database
+        env:
+          DATABASE_URL: postgresql://dev:devpass@localhost:5433/realestate
+          ADMIN_EMAIL: admin@test.example
+          ADMIN_PASSWORD: test-admin-password
+          DEMO_AGENT_EMAIL: agent@test.example
+          DEMO_AGENT_PASSWORD: test-agent-password
+        run: |
+          for attempt in {1..30}; do
+            if docker exec real-estate-postgres pg_isready -U dev -d realestate; then
+              break
+            fi
+            sleep 2
+          done
+          pnpm db:push
+          pnpm db:seed
+
+      - name: Start application services
+        run: docker compose up -d web admin
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run Playwright tests
+        run: pnpm test:e2e
+        env:
+          PLAYWRIGHT_DATABASE_CONTAINER: real-estate-postgres
+          PLAYWRIGHT_DATABASE_USER: dev
+          PLAYWRIGHT_DATABASE_NAME: realestate
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload Playwright test artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Shut down containers
+        if: always()
+        run: docker compose down --volumes --remove-orphans

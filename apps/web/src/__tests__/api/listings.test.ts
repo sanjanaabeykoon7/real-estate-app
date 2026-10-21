@@ -25,7 +25,7 @@ describe('Listings API', () => {
           ...mockListing 
         }),
       })
-    ) as any
+    ) as typeof fetch
 
     const response = await fetch('/api/listings', {
       method: 'POST',
@@ -49,7 +49,7 @@ describe('Listings API', () => {
           { id: '2', title: 'House 2' },
         ]),
       })
-    ) as any
+    ) as typeof fetch
 
     const response = await fetch('/api/listings')
     const data = await response.json()

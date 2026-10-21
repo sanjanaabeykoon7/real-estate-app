@@ -24,7 +24,7 @@ describe('FavoriteButton Component', () => {
         ok: true,
         json: () => Promise.resolve({ saved: true }),
       })
-    ) as any
+    ) as typeof fetch
 
     render(<FavoriteButton listingId="listing-123" />)
     

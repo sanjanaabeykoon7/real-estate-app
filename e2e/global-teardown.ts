@@ -1,7 +1,9 @@
 import { execFileSync } from 'node:child_process';
 
 export default function globalTeardown() {
-  if (process.env.PLAYWRIGHT_TEST_DATABASE !== 'true') {
+  const databaseContainer =
+    process.env.PLAYWRIGHT_DATABASE_CONTAINER ?? 'real-estate-postgres-test';
+  if (process.env.PLAYWRIGHT_TEST_DATABASE !== 'true' && !process.env.PLAYWRIGHT_DATABASE_CONTAINER) {
     return;
   }
 
@@ -15,7 +17,16 @@ export default function globalTeardown() {
 
   execFileSync(
     'docker',
-    ['exec', '-i', 'real-estate-postgres-test', 'psql', '-U', 'test', '-d', 'realestate_test'],
+    [
+      'exec',
+      '-i',
+      databaseContainer,
+      'psql',
+      '-U',
+      process.env.PLAYWRIGHT_DATABASE_USER ?? 'test',
+      '-d',
+      process.env.PLAYWRIGHT_DATABASE_NAME ?? 'realestate_test',
+    ],
     { input: cleanupSql, stdio: ['pipe', 'inherit', 'inherit'] },
   );
 }

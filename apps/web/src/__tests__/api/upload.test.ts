@@ -9,7 +9,7 @@ describe('Upload API', () => {
         ok: true,
         json: () => Promise.resolve({ url: mockUrl }),
       })
-    ) as any
+    ) as typeof fetch
 
     const formData = new FormData()
     formData.append('file', new File([''], 'test.jpg'))
@@ -30,7 +30,7 @@ describe('Upload API', () => {
         ok: false,
         json: () => Promise.resolve({ error: 'Upload failed' }),
       })
-    ) as any
+    ) as typeof fetch
 
     const response = await fetch('/api/upload', {
       method: 'POST',

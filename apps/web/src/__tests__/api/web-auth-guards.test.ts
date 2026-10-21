@@ -31,7 +31,7 @@ describe('Web API Auth Guards', () => {
   it('returns user when authenticated', async () => {
     vi.mocked(getServerSession).mockResolvedValue({
       user: { id: 'user-1', role: 'USER', email: 'u@test.com', name: 'User' },
-    } as any);
+    } as Awaited<ReturnType<typeof getServerSession>>);
 
     const user = await requireAuthenticatedUser();
 
@@ -39,7 +39,7 @@ describe('Web API Auth Guards', () => {
   });
 
   it('throws unauthorized when session is missing', async () => {
-    vi.mocked(getServerSession).mockResolvedValue(null as any);
+    vi.mocked(getServerSession).mockResolvedValue(null);
 
     await expect(requireAuthenticatedUser()).rejects.toMatchObject({
       status: 401,
@@ -50,7 +50,7 @@ describe('Web API Auth Guards', () => {
   it('throws forbidden when accessing another user profile', async () => {
     vi.mocked(getServerSession).mockResolvedValue({
       user: { id: 'user-1', role: 'USER', email: 'u@test.com', name: 'User' },
-    } as any);
+    } as Awaited<ReturnType<typeof getServerSession>>);
 
     await expect(requireSelfAccess('user-2')).rejects.toMatchObject({
       status: 403,

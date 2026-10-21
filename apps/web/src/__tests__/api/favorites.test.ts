@@ -11,7 +11,7 @@ describe('Favorites API', () => {
         ok: true,
         json: () => Promise.resolve({ saved: true }),
       })
-    ) as any
+    ) as typeof fetch
 
     const response = await fetch('/api/favorites', {
       method: 'POST',
@@ -29,7 +29,7 @@ describe('Favorites API', () => {
         ok: true,
         json: () => Promise.resolve({ saved: false }),
       })
-    ) as any
+    ) as typeof fetch
 
     const response = await fetch('/api/favorites', {
       method: 'POST',
@@ -49,7 +49,7 @@ describe('Favorites API', () => {
           { id: '2', listingId: 'listing-2' }
         ]),
       })
-    ) as any
+    ) as typeof fetch
 
     const response = await fetch('/api/favorites/saved-listings')
     const data = await response.json()
