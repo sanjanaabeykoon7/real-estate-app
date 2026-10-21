@@ -34,6 +34,7 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         baseURL: webBaseURL,
       },
+      testMatch: /e2e\/(?:web|api)\/.*\.spec\.ts/,
     },
     {
       name: 'admin',
@@ -41,6 +42,7 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         baseURL: adminBaseURL,
       },
+      testMatch: /e2e\/admin\/.*\.spec\.ts/,
     },
   ],
 });
