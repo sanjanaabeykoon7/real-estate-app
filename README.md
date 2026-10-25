@@ -1,282 +1,304 @@
 # Real Estate Hub
 
-A comprehensive real estate platform built as a monorepo using Turborepo. This application enables users to browse, list, and manage properties, with dedicated interfaces for web users and administrators. It includes features for property listings, user authentication, favorites management, and more.
-
-## Table of Contents
-
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-  - [Running the Application](#running-the-application)
-- [Project Structure](#project-structure)
-- [Database Management](#database-management)
+Real Estate Hub is a full-stack real estate platform built as a pnpm/Turborepo
+monorepo. It provides a public property-browsing application, user dashboards,
+and a separate administrator application for managing users and listings.
 
 ## Features
 
-- **Web Page + User Dashboard**: Browse properties, search by location/price/bedrooms, add to favorites, and manage personal profiles.
-- **Admin Dashboard**: Manage listings and users.
-- **Property Management**: Create, edit, and publish listings with image uploads via Cloudinary.
-- **Authentication**: Secure user registration and login using NextAuth with role-based access (User, Agent, Moderator, Super Admin).
-- **Favorites System**: Save and view favorite properties.
-- **Search and Filtering**: Advanced search capabilities for properties.
-- **Responsive Design**: Mobile-friendly UI using Tailwind CSS.
-- **Documentation App**: Built-in docs for development and usage reference.
+- Property browsing, details, search, and filtering
+- User registration, login, logout, profiles, and protected dashboards
+- Favorites management
+- Listing creation, editing, publishing, and deletion
+- Role-based authorization for users, agents, moderators, and administrators
+- Admin user and listing management
+- Cloudinary image uploads
+- Responsive UI built with Tailwind CSS
+- API and PostgreSQL persistence through Prisma
 
-## Tech Stack
+## Technology
 
-### Frontend
-- **React Framework**: Next.js 15
-- **UI Library**: Custom React component library
-- **Styling framework**: Tailwind CSS
+- **Applications:** Next.js 15, React 19, TypeScript
+- **Monorepo:** Turborepo and pnpm
+- **Database:** PostgreSQL
+- **ORM:** Prisma
+- **Authentication:** NextAuth.js with JWT sessions
+- **File storage:** Cloudinary
+- **Testing:** Vitest, Testing Library, and Playwright
+- **Containers:** Docker and Docker Compose
+- **CI:** GitHub Actions
+- **Deployment:** Vercel for the web and admin applications, with Neon
+  PostgreSQL
 
-### Backend
-- **Server-side API**: Next.js API Routes
-- **Database**: PostgreSQL
-- **ORM**: Prisma
-- **Authentication**: NextAuth.js (with JWT)
-- **File Storage**: Cloudinary
+## Project structure
 
-### Development & Architecture
-- **Monorepo Tool**: Turborepo
-- **Package Manager**: pnpm
-- **Language**: TypeScript
-- **State Management**: TanStack Query (React Query)
-- **Code Quality**: ESLint + Prettier with custom configurations
+```text
+apps/
+├── admin/          # Administrator dashboard
+├── docs/           # Documentation application
+└── web/            # Public application, dashboards, and API routes
 
-### Infrastructure
-- **Build System**: Next.js with Turbopack
-- **Deployment**: 
-- **CI/CD**: 
+packages/
+├── database/       # Prisma schema, migrations, client, and seed scripts
+├── eslint-config/  # Shared ESLint configuration
+├── typescript-config/ # Shared TypeScript configuration
+└── ui/             # Shared UI components
 
-## Getting Started
-
-### Prerequisites
-
-- Node.js >= 18
-- PostgreSQL database (local or hosted, e.g., via Docker)
-- Environment variables: Set up `.env` files in relevant apps/packages (e.g., `DATABASE_URL`, `NEXTAUTH_SECRET`, Cloudinary credentials)
-
-### Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/sanjanaabeykoon7/real-estate-app.git
-   cd real-estate-app
-   ```
-
-2. Install dependencies:
-   ```bash
-   pnpm install
-   ```
-
-3. Set up the database:
-   - Update `DATABASE_URL` in `.env` (root or packages/database).
-   - Run migrations and seed:
-     ```bash
-     pnpm run db:migrate
-     pnpm run db:seed
-     ```
-
-### Running the Application
-
-- Start all apps in development mode:
-  ```bash
-  pnpm dev
-  ```
-
-- Individual apps:
-  - Web: `http://localhost:3002` (main user interface)
-  - Admin: `http://localhost:3003` (admin dashboard)
-  - Docs: `http://localhost:3001` (documentation)
-
-- Build for production:
-  ```bash
-  pnpm build
-  ```
-
-- Lint and type-check:
-  ```bash
-  pnpm lint
-  pnpm check-types
-  ```
-
-## Project Structure
-
-This is a Turborepo monorepo with the following structure:
-
-```
-├── README.md
-├── package.json
-├── pnpm-lock.yaml
-├── pnpm-workspace.yaml
-├── tsconfig.json
-├── turbo.json
-├── apps/
-│   ├── admin/          # Admin dashboard (Next.js)
-│   ├── docs/           # Documentation site (Next.js)
-│   └── web/            # Main web app (Next.js)
-└── packages/
-    ├── database/       # Prisma schema, migrations, and client
-    ├── eslint-config/  # Shared ESLint configurations
-    ├── typescript-config/ # Shared TypeScript configs
-    └── ui/             # Shared React UI components
+e2e/
+├── admin/          # Admin Playwright tests
+├── api/            # API and database integration tests
+└── web/            # Public web Playwright tests
 ```
 
-- **apps/web**: Handles user-facing features like property browsing, favorites, and dashboards.
-- **apps/admin**: Admin tools for managing users and listings.
-- **packages/database**: Prisma setup with schema for Users, Listings, and SavedProperties.
-- **packages/ui**: Reusable components like `ImageUpload`.
+The `web` application contains the public frontend and its Next.js API routes.
+The `admin` application is a separate Next.js application.
 
-## Database Management
+## Prerequisites
 
-- Schema: Defined in `packages/database/prisma/schema.prisma`.
-- Commands (from root):
-  - Generate client: `pnpm run db:generate`
-  - Push schema: `pnpm run db:push`
-  - Run migrations: `pnpm run db:migrate`
-  - Seed data: `pnpm run db:seed`
-  - Studio: `pnpm run db:studio` (Prisma Studio at http://localhost:5432)
+- Node.js 18 or newer
+- pnpm 9
+- Docker Desktop for the local container workflow
+- A PostgreSQL database for local development, testing, or deployment
 
-Default seeded users:
-- Admin: `admin@realestate.com` / `admin@1234` (SUPER_ADMIN)
-- Agent: `agent@realestate.com` / `agent@1234` (AGENT, with sample listings)
+Install dependencies from the repository root:
 
----
-
-<!--# Turborepo starter
-
-This Turborepo starter is maintained by the Turborepo core team.
-
-## Using this example
-
-Run the following command:
-
-```sh
-npx create-turbo@latest
+```bash
+pnpm install
 ```
 
-## What's inside?
+## Environment variables
 
-This Turborepo includes the following packages/apps:
+Environment files are intentionally ignored by Git. Do not commit credentials
+or copy production secrets into the repository.
 
-### Apps and Packages
+For local development, configure the environment files used by each tool:
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+- `apps/web/.env` for the web application
+- `apps/admin/.env.local` for the admin application
+- `packages/database/.env` for Prisma commands
+- `apps/web/.env.docker` and `apps/admin/.env.docker` for Docker Compose
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+Common application variables are:
 
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+```env
+DATABASE_URL=your-postgresql-connection-string
+NEXTAUTH_URL=http://localhost:3002
+NEXTAUTH_SECRET=your-local-secret
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
 ```
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+The admin application uses port `3003` and should use its own local
+`NEXTAUTH_URL`. Vercel environment variables are configured in the Vercel
+dashboard rather than committed to the repository.
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+## Local development
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+Start all development applications:
 
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
+```bash
+pnpm dev
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+Default local URLs:
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
+- Web: <http://localhost:3002>
+- Admin: <http://localhost:3003>
+- Docs: <http://localhost:3001>
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
+Run an individual application with a filter:
 
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
+```bash
+pnpm --filter web dev
+pnpm --filter admin dev
+pnpm --filter docs dev
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+## Database management
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+The Prisma schema and migrations are in
+`packages/database/prisma`.
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
+Generate Prisma Client:
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
+```bash
+pnpm db:generate
 ```
 
-## Useful Links
+Apply the current schema during local development:
 
-Learn more about the power of Turborepo:
+```bash
+pnpm db:push
+```
 
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+Apply committed migrations to a deployed database:
+
+```bash
+pnpm --filter database exec prisma migrate deploy
+```
+
+Seed the database:
+
+```bash
+pnpm db:seed
+```
+
+The seed script creates an administrator. It creates the demo agent and sample
+listings only when `NODE_ENV` is not `production`. Provide `ADMIN_EMAIL` and
+`ADMIN_PASSWORD` explicitly when seeding a deployed database.
+
+For Neon or another hosted PostgreSQL provider, use the provider's connection
+string in the command environment.
+
+Open Prisma Studio with:
+
+```bash
+pnpm --filter database exec prisma studio
+```
+
+## Docker Desktop
+
+The main Compose file runs PostgreSQL, web, and admin services:
+
+```bash
+docker compose up -d --build
+```
+
+Services and host ports:
+
+- PostgreSQL: `localhost:5433`
+- Web: <http://localhost:3002>
+- Admin: <http://localhost:3003>
+
+Stop the services and remove the local database volume:
+
+```bash
+docker compose down --volumes --remove-orphans
+```
+
+The Dockerfiles are:
+
+- `apps/web/Dockerfile`
+- `apps/admin/Dockerfile`
+
+Both use multi-stage builds, generate the required Prisma Client, and run
+Next.js standalone output.
+
+## Testing
+
+Run the Vitest unit, component, and backend validation tests:
+
+```bash
+pnpm test:run
+```
+
+The test database is isolated from local and production databases. Start and
+seed it with:
+
+```bash
+pnpm test:db:reset
+```
+
+The isolated PostgreSQL container uses host port `5434`. Stop it with:
+
+```bash
+pnpm test:db:down
+```
+
+The Playwright suite covers:
+
+- Web homepage, registration, login/logout, browsing, search, details,
+  favorites, and protected routes
+- Admin login/logout, authorization, listing management, user management, and
+  upload validation
+- Real API routes with direct PostgreSQL persistence assertions
+
+Run the end-to-end suite after the required applications and test database are
+running:
+
+```bash
+pnpm test:e2e
+```
+
+Playwright uses separate projects so web/API tests run against port `3002` and
+admin tests run against port `3003`. Reports are written to
+`playwright-report/`; screenshots, traces, and videos are retained for failed
+tests according to the Playwright configuration.
+
+## Quality checks
+
+```bash
+pnpm lint
+pnpm check-types
+pnpm build
+```
+
+The web and admin builds generate Prisma Client before running `next build`.
+
+## GitHub Actions CI
+
+The workflow in `.github/workflows/ci.yml` runs on pushes to `main` and on pull
+requests. It:
+
+1. Installs dependencies with the repository's pnpm version
+2. Generates Prisma Client
+3. Runs linting and TypeScript checks
+4. Runs Vitest
+5. Builds the Docker images
+6. Starts PostgreSQL and initializes a CI database
+7. Starts the web and admin containers
+8. Installs Chromium and runs Playwright
+9. Uploads Playwright reports and failure artifacts
+10. Shuts down containers even when an earlier step fails
+
+CI uses non-production credentials and a disposable Docker PostgreSQL database.
+
+## Deployment
+
+The web and admin applications are deployed as separate Vercel projects from
+the `main` branch:
+
+### Web project
+
+- Root directory: `.`
+- Build command: `pnpm --filter web build`
+- Output directory: `apps/web/.next`
+- Install command: `pnpm install --frozen-lockfile`
+
+### Admin project
+
+- Root directory: `.`
+- Build command: `pnpm --filter admin build`
+- Output directory: `apps/admin/.next`
+- Install command: `pnpm install --frozen-lockfile`
+
+Configure environment variables in each Vercel project. Use each project's
+production URL as its `NEXTAUTH_URL`, and use a strong production
+`NEXTAUTH_SECRET`. The web and admin projects may use the same Neon
+`DATABASE_URL`, but each must have the credentials required by its own
+application.
+
+Before using the deployed applications, apply the committed Prisma migrations
+to Neon and seed the production administrator. Use the Neon direct connection
+for migrations:
+
+```powershell
+$env:DATABASE_URL="YOUR_NEON_DIRECT_CONNECTION_STRING"
+pnpm.cmd --filter database exec prisma migrate deploy
+
+$env:NODE_ENV="production"
+$env:ADMIN_EMAIL="YOUR_PRODUCTION_ADMIN_EMAIL"
+$env:ADMIN_PASSWORD="YOUR_PRODUCTION_ADMIN_PASSWORD"
+pnpm.cmd --filter database db:seed
+```
+
+Keep a previous deployment available until the production checks
+finish successfully.
+
+## Security notes
+
+- Never commit `.env` files, passwords, database URLs, or Cloudinary secrets.
+- Use separate credentials for local development, CI, and production.
+- Rotate any credential that has been exposed or shared.
+- Do not use production credentials in tests or GitHub Actions.
